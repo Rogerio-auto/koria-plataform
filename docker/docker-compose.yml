@@ -1,64 +1,88 @@
-# KorIA Platform — Docker Compose (Development)
-# Starts all infrastructure services needed for local development.
-
-version: '3.8'
+# KorIA Platform — Docker Compose (Produção)
+# Conecta nas redes existentes do stack da VPS (proxy + internal)
+# Aproveita o PostgreSQL, Redis e Nginx Proxy Manager já instalados.
+#
+# Deploy: docker compose -f docker/docker-compose.yml --env-file .env up -d --build
 
 services:
-  # PostgreSQL
-  postgres:
-    image: postgres:15-alpine
-    container_name: koria-postgres
+  # ── API (NestJS) ──────────────────────────────────────
+  koria-api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.api
+    container_name: koria_api
     restart: unless-stopped
-    ports:
-      - '5432:5432'
+    networks:
+      - proxy
+      - internal
     environment:
-      POSTGRES_USER: koria
-      POSTGRES_PASSWORD: koria_dev
-      POSTGRES_DB: koria
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - NODE_ENV=production
+      - API_PORT=3000
+      - API_PREFIX=/api/v1
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${DB_KORIA:-core_db}
+      - REDIS_URL=redis://redis:6379/4
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-7d}
+      - CLICKUP_CLIENT_ID=${CLICKUP_CLIENT_ID}
+      - CLICKUP_CLIENT_SECRET=${CLICKUP_CLIENT_SECRET}
+      - CLICKUP_REDIRECT_URI=${CLICKUP_REDIRECT_URI}
+      - CLICKUP_ACCESS_TOKEN=${CLICKUP_ACCESS_TOKEN}
+      - CLICKUP_REFRESH_TOKEN=${CLICKUP_REFRESH_TOKEN}
+      - N8N_WEBHOOK_URL=${N8N_WEBHOOK_URL}
+      - DEFAULT_TENANT_ID=${DEFAULT_TENANT_ID:-a9081890-d60f-4d91-ab05-c1407302a4c9}
+      - TZ=${TZ:-America/Sao_Paulo}
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U koria']
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  # Redis (cache + BullMQ)
-  redis:
-    image: redis:7-alpine
-    container_name: koria-redis
-    restart: unless-stopped
-    ports:
-      - '6379:6379'
-    volumes:
-      - redis_data:/data
-    healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  # MinIO (S3-compatible storage for local dev)
-  minio:
-    image: minio/minio:latest
-    container_name: koria-minio
-    restart: unless-stopped
-    ports:
-      - '9000:9000'
-      - '9001:9001'
-    environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
-    volumes:
-      - minio_data:/data
-    command: server /data --console-address ":9001"
-    healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:9000/minio/health/live']
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/api/v1/health || exit 1"]
       interval: 30s
-      timeout: 20s
+      timeout: 10s
       retries: 3
 
-volumes:
-  postgres_data:
-  redis_data:
-  minio_data:
+  # ── Upload Portal (React) ─────────────────────────────
+  koria-upload-portal:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.frontend
+      args:
+        APP_NAME: upload-portal
+    container_name: koria_upload_portal
+    restart: unless-stopped
+    networks:
+      - proxy
+    # Nginx Proxy Manager aponta upload.koriastudio.com → koria_upload_portal:80
+
+  # ── Dashboard (React) ─────────────────────────────────
+  koria-dashboard:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.frontend
+      args:
+        APP_NAME: dashboard
+    container_name: koria_dashboard
+    restart: unless-stopped
+    networks:
+      - proxy
+    # Nginx Proxy Manager aponta dashboard.koriastudio.com → koria_dashboard:80
+
+  # ── Briefing Form (React) ─────────────────────────────
+  koria-briefing-form:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.frontend
+      args:
+        APP_NAME: briefing-form
+    container_name: koria_briefing_form
+    restart: unless-stopped
+    networks:
+      - proxy
+    # Nginx Proxy Manager aponta briefing.koriastudio.com → koria_briefing_form:80
+
+# ── Redes existentes do stack da VPS ────────────────────
+# Usa external: true para conectar nas redes que já existem
+# (criadas pelo docker-compose do seu stack principal)
+networks:
+  proxy:
+    external: true
+    name: ${PROJECT_NAME}_proxy
+  internal:
+    external: true
+    name: ${PROJECT_NAME}_internal
