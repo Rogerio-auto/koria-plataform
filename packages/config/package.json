@@ -1,0 +1,12 @@
+{
+  "name": "@koria/config",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Shared configurations for KorIA Platform (ESLint, Prettier, Tailwind, TypeScript)",
+  "files": [
+    "eslint",
+    "prettier",
+    "tailwind",
+    "typescript"
+  ]
+}

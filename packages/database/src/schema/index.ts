@@ -1,0 +1,26 @@
+// Drizzle ORM schema — maps to existing PostgreSQL schema "core"
+
+export * from './tenants';
+export * from './leads';
+export * from './contact-points';
+export * from './lead-qualification';
+export * from './conversations';
+export * from './messages';
+export * from './pipelines';
+export * from './stages';
+export * from './lead-stage';
+export * from './tags';
+export * from './products';
+export * from './product-prices';
+export * from './quotes';
+export * from './quote-items';
+export * from './payment-intents';
+export * from './payment-events';
+export * from './work-orders';
+export * from './work-order-assets';
+export * from './approvals';
+export * from './followup-rules';
+export * from './followup-queue';
+export * from './events';
+export * from './ai-runs';
+export * from './errors';

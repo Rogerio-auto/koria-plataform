@@ -1,0 +1,43 @@
+{
+  "upload": {
+    "title": "Carga de Archivos",
+    "subtitle": "Suba los archivos de su proyecto",
+    "dropzone": {
+      "title": "Arrastre y suelte sus archivos aquí",
+      "subtitle": "o haga clic para seleccionar",
+      "formats": "Formatos aceptados: JPG, PNG, PDF, MP4, MOV, AI, PSD",
+      "maxSize": "Tamaño máximo por archivo: 500MB"
+    },
+    "files": {
+      "title": "Archivos Subidos",
+      "name": "Nombre",
+      "size": "Tamaño",
+      "status": "Estado",
+      "uploading": "Subiendo...",
+      "completed": "Completado",
+      "failed": "Fallido",
+      "remove": "Eliminar"
+    },
+    "workOrder": {
+      "title": "Detalles del Pedido",
+      "product": "Producto",
+      "status": "Estado",
+      "dueAt": "Fecha Límite"
+    },
+    "actions": {
+      "upload": "Subir Archivos",
+      "uploading": "Subiendo...",
+      "done": "Listo"
+    },
+    "errors": {
+      "invalidToken": "Token inválido o expirado",
+      "fileTooLarge": "Archivo demasiado grande",
+      "invalidFormat": "Formato no válido",
+      "uploadFailed": "Error al subir"
+    },
+    "success": {
+      "title": "¡Carga Completada!",
+      "message": "Todos los archivos se han subido correctamente."
+    }
+  }
+}

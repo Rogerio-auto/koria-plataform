@@ -1,0 +1,43 @@
+{
+  "briefing": {
+    "title": "Formulario de Briefing",
+    "subtitle": "Complete la información de su proyecto",
+    "steps": {
+      "personal": "Datos Personales",
+      "company": "Empresa",
+      "project": "Proyecto",
+      "references": "Referencias",
+      "review": "Revisión"
+    },
+    "fields": {
+      "fullName": "Nombre Completo",
+      "email": "Correo Electrónico",
+      "phone": "Teléfono",
+      "instagram": "Instagram",
+      "linkedin": "LinkedIn",
+      "website": "Sitio Web",
+      "companyName": "Nombre de la Empresa",
+      "companySize": "Tamaño de la Empresa",
+      "industry": "Industria",
+      "role": "Cargo",
+      "projectType": "Tipo de Proyecto",
+      "projectGoal": "Objetivo del Proyecto",
+      "description": "Descripción",
+      "deadline": "Plazo",
+      "budget": "Presupuesto",
+      "references": "URLs de Referencia",
+      "howFoundUs": "¿Cómo nos encontró?",
+      "notes": "Notas Adicionales"
+    },
+    "actions": {
+      "next": "Siguiente",
+      "previous": "Anterior",
+      "submit": "Enviar Briefing",
+      "uploading": "Enviando..."
+    },
+    "success": {
+      "title": "¡Briefing Enviado!",
+      "message": "¡Gracias! Nos pondremos en contacto pronto."
+    }
+  }
+}

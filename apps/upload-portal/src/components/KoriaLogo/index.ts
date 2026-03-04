@@ -1,0 +1,1 @@
+export { KoriaLogo } from './KoriaLogo';

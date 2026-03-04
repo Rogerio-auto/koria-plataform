@@ -1,0 +1,68 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* KorIA — tema escuro como padrão (identidade visual da marca) */
+  :root {
+    --background: 0 0% 14.5%;         /* #252525 fundo principal */
+    --foreground: 0 0% 96%;            /* #f5f5f5 texto branco */
+    --card: 0 0% 18%;                  /* #2d2d2d cards */
+    --card-foreground: 0 0% 96%;
+    --popover: 0 0% 18%;
+    --popover-foreground: 0 0% 96%;
+    --primary: 122 45% 49%;            /* #45B649 verde KorIA */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 22%;             /* #383838 */
+    --secondary-foreground: 0 0% 90%;
+    --muted: 0 0% 20%;                 /* #333333 */
+    --muted-foreground: 0 0% 60%;      /* #999999 */
+    --accent: 122 45% 49%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 24%;                /* #3d3d3d */
+    --input: 0 0% 24%;
+    --ring: 122 45% 49%;
+    --radius: 0.625rem;
+
+    /* Progresso upload */
+    --progress: 122 45% 49%;
+    --progress-bg: 0 0% 20%;
+  }
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    @apply font-sans antialiased;
+  }
+
+  /* Scrollbar customizada */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--background));
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground));
+  }
+}
+
+@layer utilities {
+  .text-gradient-koria {
+    @apply bg-gradient-to-r from-white to-green-400 bg-clip-text text-transparent;
+  }
+}

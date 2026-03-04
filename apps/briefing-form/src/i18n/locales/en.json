@@ -1,0 +1,43 @@
+{
+  "briefing": {
+    "title": "Briefing Form",
+    "subtitle": "Fill in your project information",
+    "steps": {
+      "personal": "Personal Info",
+      "company": "Company",
+      "project": "Project",
+      "references": "References",
+      "review": "Review"
+    },
+    "fields": {
+      "fullName": "Full Name",
+      "email": "Email",
+      "phone": "Phone",
+      "instagram": "Instagram",
+      "linkedin": "LinkedIn",
+      "website": "Website",
+      "companyName": "Company Name",
+      "companySize": "Company Size",
+      "industry": "Industry",
+      "role": "Role",
+      "projectType": "Project Type",
+      "projectGoal": "Project Goal",
+      "description": "Description",
+      "deadline": "Deadline",
+      "budget": "Budget",
+      "references": "Reference URLs",
+      "howFoundUs": "How did you find us?",
+      "notes": "Additional Notes"
+    },
+    "actions": {
+      "next": "Next",
+      "previous": "Previous",
+      "submit": "Submit Briefing",
+      "uploading": "Uploading..."
+    },
+    "success": {
+      "title": "Briefing Submitted!",
+      "message": "Thank you! We'll be in touch soon."
+    }
+  }
+}

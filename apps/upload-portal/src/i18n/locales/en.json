@@ -1,0 +1,43 @@
+{
+  "upload": {
+    "title": "File Upload",
+    "subtitle": "Upload your project files",
+    "dropzone": {
+      "title": "Drag and drop your files here",
+      "subtitle": "or click to select",
+      "formats": "Accepted formats: JPG, PNG, PDF, MP4, MOV, AI, PSD",
+      "maxSize": "Maximum file size: 500MB"
+    },
+    "files": {
+      "title": "Uploaded Files",
+      "name": "Name",
+      "size": "Size",
+      "status": "Status",
+      "uploading": "Uploading...",
+      "completed": "Completed",
+      "failed": "Failed",
+      "remove": "Remove"
+    },
+    "workOrder": {
+      "title": "Order Details",
+      "product": "Product",
+      "status": "Status",
+      "dueAt": "Due Date"
+    },
+    "actions": {
+      "upload": "Upload Files",
+      "uploading": "Uploading...",
+      "done": "Done"
+    },
+    "errors": {
+      "invalidToken": "Invalid or expired token",
+      "fileTooLarge": "File too large",
+      "invalidFormat": "Invalid format",
+      "uploadFailed": "Upload failed"
+    },
+    "success": {
+      "title": "Upload Complete!",
+      "message": "All files have been uploaded successfully."
+    }
+  }
+}

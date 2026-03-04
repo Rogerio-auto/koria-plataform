@@ -1,0 +1,60 @@
+# KorIA Platform — Deploy Pipeline
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy-api:
+    name: Deploy API
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build API Docker image
+        run: docker build -f docker/Dockerfile.api -t koria-api:${{ github.sha }} .
+
+      # TODO: Push to container registry (Docker Hub, GHCR, or Cloudflare)
+      # TODO: Deploy to hosting (Railway, Fly.io, VPS, etc.)
+
+      - name: Tag and push image
+        run: |
+          echo "TODO: Push koria-api:${{ github.sha }} to registry"
+          echo "TODO: Deploy to production"
+
+  deploy-frontend:
+    name: Deploy Frontend Apps
+    runs-on: ubuntu-latest
+    environment: production
+    strategy:
+      matrix:
+        app: [dashboard, briefing-form, upload-portal]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build ${{ matrix.app }}
+        run: pnpm --filter @koria/${{ matrix.app }} build
+
+      # TODO: Deploy static files to Cloudflare Pages or similar
+      - name: Deploy to Cloudflare Pages
+        run: |
+          echo "TODO: Deploy apps/${{ matrix.app }}/dist to Cloudflare Pages"
