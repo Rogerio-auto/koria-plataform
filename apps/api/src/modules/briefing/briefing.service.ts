@@ -93,66 +93,73 @@ export class BriefingService {
 
     const now = new Date();
 
-    const values = {
+    const raw = {
       tenantId: wo.tenantId,
       leadId: wo.leadId,
       status: 'completed' as const,
       fullName: dto.fullName,
       email: dto.email,
-      phoneNumber: dto.phoneNumber,
-      instagramPersonal: dto.instagramPersonal,
-      instagramCompany: dto.instagramCompany,
-      linkedinUrl: dto.linkedinUrl,
-      websiteUrl: dto.websiteUrl,
-      companyName: dto.companyName,
-      companySize: dto.companySize,
-      industry: dto.industry,
-      roleInCompany: dto.roleInCompany,
+      phoneNumber: dto.phoneNumber ?? null,
+      instagramPersonal: dto.instagramPersonal ?? null,
+      instagramCompany: dto.instagramCompany ?? null,
+      linkedinUrl: dto.linkedinUrl ?? null,
+      websiteUrl: dto.websiteUrl ?? null,
+      companyName: dto.companyName ?? null,
+      companySize: dto.companySize ?? null,
+      industry: dto.industry ?? null,
+      roleInCompany: dto.roleInCompany ?? null,
       propertyName: dto.propertyName,
       propertyAddress: dto.propertyAddress,
-      propertyUnits: dto.propertyUnits,
-      propertyUnitSizes: dto.propertyUnitSizes,
-      propertyDifferentials: dto.propertyDifferentials,
-      brandColors: dto.brandColors,
-      communicationTone: dto.communicationTone,
-      visualReferences: dto.visualReferences,
-      targetAudience: dto.targetAudience,
-      mainEmotion: dto.mainEmotion,
-      mandatoryElements: dto.mandatoryElements,
-      elementsToAvoid: dto.elementsToAvoid,
-      priceRange: dto.priceRange,
-      paymentConditions: dto.paymentConditions,
-      launchDate: dto.launchDate,
-      realtorContact: dto.realtorContact,
-      voiceoverText: dto.voiceoverText,
-      musicPreference: dto.musicPreference,
-      legalDisclaimers: dto.legalDisclaimers,
-      projectType: dto.projectType,
-      projectGoal: dto.projectGoal,
-      projectDescription: dto.projectDescription,
-      deadline: dto.deadline,
-      budgetRange: dto.budgetRange,
-      referencesUrls: dto.referencesUrls,
-      howFoundUs: dto.howFoundUs,
-      additionalNotes: dto.additionalNotes,
+      propertyUnits: dto.propertyUnits ?? null,
+      propertyUnitSizes: dto.propertyUnitSizes ?? null,
+      propertyDifferentials: dto.propertyDifferentials ?? null,
+      brandColors: dto.brandColors ?? null,
+      communicationTone: dto.communicationTone ?? null,
+      visualReferences: dto.visualReferences ?? null,
+      targetAudience: dto.targetAudience ?? null,
+      mainEmotion: dto.mainEmotion ?? null,
+      mandatoryElements: dto.mandatoryElements ?? null,
+      elementsToAvoid: dto.elementsToAvoid ?? null,
+      priceRange: dto.priceRange ?? null,
+      paymentConditions: dto.paymentConditions ?? null,
+      launchDate: dto.launchDate ?? null,
+      realtorContact: dto.realtorContact ?? null,
+      voiceoverText: dto.voiceoverText ?? null,
+      musicPreference: dto.musicPreference ?? null,
+      legalDisclaimers: dto.legalDisclaimers ?? null,
+      projectType: dto.projectType ?? null,
+      projectGoal: dto.projectGoal ?? null,
+      projectDescription: dto.projectDescription ?? null,
+      deadline: dto.deadline ?? null,
+      budgetRange: dto.budgetRange ?? null,
+      referencesUrls: dto.referencesUrls ?? null,
+      howFoundUs: dto.howFoundUs ?? null,
+      additionalNotes: dto.additionalNotes ?? null,
       submittedAt: now,
       completedAt: now,
       updatedAt: now,
     };
 
-    if (existing[0]) {
-      await this.db
-        .update(leadQualification)
-        .set(values)
-        .where(eq(leadQualification.leadId, wo.leadId));
+    const values = raw;
 
-      this.logger.log(`Briefing updated for lead ${wo.leadId}`);
-    } else {
-      await this.db
-        .insert(leadQualification)
-        .values(values);
+    try {
+      if (existing[0]) {
+        await this.db
+          .update(leadQualification)
+          .set(values)
+          .where(eq(leadQualification.leadId, wo.leadId));
 
-      this.logger.log(`Briefing created for lead ${wo.leadId}`);
+        this.logger.log(`Briefing updated for lead ${wo.leadId}`);
+      } else {
+        await this.db
+          .insert(leadQualification)
+          .values(values);
+
+        this.logger.log(`Briefing created for lead ${wo.leadId}`);
+      }
+    } catch (error) {
+      this.logger.error(`DB error saving briefing for lead ${wo.leadId}: ${error}`);
+      throw error;
     }
 
     // ── Sync to ClickUp (non-blocking) ──────────────────

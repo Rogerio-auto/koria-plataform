@@ -4,7 +4,6 @@ import {
   IsOptional,
   IsArray,
   MinLength,
-  Matches,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -101,7 +100,7 @@ export class SubmitBriefingDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsArray()
-  @Matches(/^#[0-9a-fA-F]{6}$/, { each: true, message: 'Each color must be a valid hex code (#RRGGBB)' })
+  @IsString({ each: true })
   brandColors?: string[];
 
   @ApiPropertyOptional()
