@@ -190,4 +190,45 @@ export class ClickupService {
       return null;
     }
   }
+
+  /**
+   * Post a comment to a ClickUp task.
+   * POST /api/v2/task/{task_id}/comment
+   */
+  async postComment(
+    taskId: string,
+    commentText: string,
+  ): Promise<boolean> {
+    if (!this.accessToken) {
+      this.logger.warn('ClickUp access_token não disponível, pulando comentário');
+      return false;
+    }
+
+    try {
+      const response = await this.authenticatedFetch(
+        `${this.baseUrl}/task/${taskId}/comment`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ comment_text: commentText }),
+        },
+      );
+
+      if (!response.ok) {
+        const errorBody = await response.text();
+        this.logger.error(
+          `ClickUp comment falhou (${response.status}): ${errorBody}`,
+        );
+        return false;
+      }
+
+      this.logger.log(`Comentário postado na task ClickUp ${taskId}`);
+      return true;
+    } catch (error) {
+      this.logger.error(
+        `Falha ao postar comentário na task ClickUp ${taskId}: ${error}`,
+      );
+      return false;
+    }
+  }
 }

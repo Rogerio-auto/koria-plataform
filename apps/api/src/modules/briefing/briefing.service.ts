@@ -9,6 +9,7 @@ import { eq } from 'drizzle-orm';
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import { DATABASE_CONNECTION } from '../database/database.module';
 import { leads, leadQualification, workOrders } from '@koria/database';
+import { ClickupService } from '../clickup/clickup.service';
 import { SubmitBriefingDto } from './dto/submit-briefing.dto';
 
 @Injectable()
@@ -18,6 +19,7 @@ export class BriefingService {
   constructor(
     @Inject(DATABASE_CONNECTION)
     private readonly db: PostgresJsDatabase,
+    private readonly clickupService: ClickupService,
   ) {}
 
   /** Resolve uploadToken → workOrder + lead info */
@@ -27,6 +29,7 @@ export class BriefingService {
         workOrderId: workOrders.id,
         leadId: workOrders.leadId,
         tenantId: workOrders.tenantId,
+        externalTaskId: workOrders.externalTaskId,
       })
       .from(workOrders)
       .where(eq(workOrders.uploadToken, token))
@@ -152,7 +155,101 @@ export class BriefingService {
       this.logger.log(`Briefing created for lead ${wo.leadId}`);
     }
 
+    // ── Sync to ClickUp (non-blocking) ──────────────────
+    if (wo.externalTaskId && this.clickupService.isConfigured()) {
+      this.syncToClickUp(wo.externalTaskId, dto).catch((err) => {
+        this.logger.error(`ClickUp sync failed: ${err}`);
+      });
+    }
+
     return { success: true };
+  }
+
+  // ── ClickUp integration ──────────────────────────────
+
+  private async syncToClickUp(taskId: string, dto: SubmitBriefingDto) {
+    // A) Post formatted comment
+    const markdown = this.formatBriefingComment(dto);
+    await this.clickupService.postComment(taskId, markdown);
+
+    // B) Attach JSON with raw data
+    const jsonData = this.buildBriefingJson(dto);
+    const buffer = Buffer.from(JSON.stringify(jsonData, null, 2), 'utf-8');
+    const fileName = `briefing-${new Date().toISOString().slice(0, 10)}.json`;
+    await this.clickupService.attachFileToTask(taskId, buffer, fileName, 'application/json');
+
+    this.logger.log(`Briefing synced to ClickUp task ${taskId}`);
+  }
+
+  private formatBriefingComment(dto: SubmitBriefingDto): string {
+    const line = (label: string, value?: string | null) =>
+      value ? `• ${label}: ${value}` : '';
+    const list = (label: string, items?: string[] | null) =>
+      items?.length ? `• ${label}: ${items.join(', ')}` : '';
+    const section = (title: string, lines: string[]) => {
+      const filtered = lines.filter(Boolean);
+      if (!filtered.length) return '';
+      return `\n📋 ${title}\n${filtered.join('\n')}`;
+    };
+
+    const parts = [
+      `🏗️ BRIEFING — ${dto.propertyName || dto.fullName}`,
+      `Enviado em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`,
+
+      section('Contato', [
+        line('Nome', dto.fullName),
+        line('Email', dto.email),
+        line('Telefone', dto.phoneNumber),
+      ]),
+
+      section('Empreendimento', [
+        line('Nome', dto.propertyName),
+        line('Endereço', dto.propertyAddress),
+        line('Unidades', dto.propertyUnits),
+        line('Metragens', dto.propertyUnitSizes),
+        list('Diferenciais', dto.propertyDifferentials),
+      ]),
+
+      section('Identidade Visual', [
+        list('Cores da marca', dto.brandColors),
+        line('Tom de comunicação', dto.communicationTone),
+        list('Referências visuais', dto.visualReferences),
+      ]),
+
+      section('Direção Criativa', [
+        line('Público-alvo', dto.targetAudience),
+        line('Emoção principal', dto.mainEmotion),
+        list('Elementos obrigatórios', dto.mandatoryElements),
+        list('Elementos a evitar', dto.elementsToAvoid),
+      ]),
+
+      section('Informações Comerciais', [
+        line('Faixa de preço', dto.priceRange),
+        line('Condições de pagamento', dto.paymentConditions),
+        line('Data de lançamento', dto.launchDate),
+        line('Contato do corretor', dto.realtorContact),
+      ]),
+
+      section('Extras', [
+        line('Texto para locução', dto.voiceoverText),
+        line('Preferência musical', dto.musicPreference),
+        line('Avisos legais', dto.legalDisclaimers),
+        line('Observações', dto.additionalNotes),
+      ]),
+    ];
+
+    return parts.filter(Boolean).join('\n');
+  }
+
+  private buildBriefingJson(dto: SubmitBriefingDto): Record<string, unknown> {
+    const { token, ...data } = dto;
+    return {
+      _meta: {
+        type: 'briefing',
+        submittedAt: new Date().toISOString(),
+      },
+      ...data,
+    };
   }
 
   async uploadLogo(token: string, file: Express.Multer.File) {
