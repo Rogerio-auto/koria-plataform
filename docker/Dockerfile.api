@@ -17,17 +17,21 @@ RUN pnpm install --frozen-lockfile
 # Build the API
 RUN pnpm --filter @koria/api build
 
+# Deploy: cria uma pasta standalone com todas as dependências resolvidas
+RUN pnpm --filter @koria/api deploy --prod /app/production
+
 # --- Stage 2: Production ---
 FROM node:20-alpine AS runner
-RUN corepack enable && corepack prepare pnpm@9 --activate
 WORKDIR /app
 
 ENV NODE_ENV=production
 
-# Copy built output and production dependencies
+# Copy deploy output (node_modules desduplicados + package.json)
+COPY --from=builder /app/production/node_modules ./node_modules
+COPY --from=builder /app/production/package.json ./
+
+# Copy built dist
 COPY --from=builder /app/apps/api/dist ./dist
-COPY --from=builder /app/apps/api/package.json ./
-COPY --from=builder /app/node_modules ./node_modules
 
 EXPOSE 3000
 
