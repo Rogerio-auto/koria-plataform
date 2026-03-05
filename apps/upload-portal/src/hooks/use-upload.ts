@@ -2,9 +2,13 @@ import { useState, useCallback } from 'react';
 import { uploadApi, type UploadedFile } from '@/services/api';
 import { getFileCategory, ALL_ALLOWED_MIME_TYPES, MAX_FILE_SIZES } from '@koria/utils';
 
-export interface FileWithPreview extends File {
+export interface FileWithPreview {
+  file: File;
   preview?: string;
   id: string;
+  fileName: string;
+  fileSize: number;
+  mimeType: string;
   status: 'pending' | 'uploading' | 'success' | 'error';
   error?: string;
 }
@@ -43,13 +47,17 @@ export function useUpload({ token, onComplete }: UseUploadOptions) {
         continue;
       }
 
-      const fileWithPreview = Object.assign(file, {
+      const fileWithPreview: FileWithPreview = {
+        file,
         id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        fileName: file.name,
+        fileSize: file.size,
+        mimeType: file.type,
         status: 'pending' as const,
         preview: file.type.startsWith('image/')
           ? URL.createObjectURL(file)
           : undefined,
-      });
+      };
 
       validFiles.push(fileWithPreview);
     }
@@ -83,7 +91,7 @@ export function useUpload({ token, onComplete }: UseUploadOptions) {
     );
 
     try {
-      const rawFiles = files.map((f) => f as File);
+      const rawFiles = files.map((f) => f.file);
       const result = await uploadApi.uploadFiles(token, rawFiles, setProgress);
 
       if (result.success) {

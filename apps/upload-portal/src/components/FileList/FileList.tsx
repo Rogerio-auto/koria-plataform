@@ -55,21 +55,21 @@ export function FileList({ files, onRemove, disabled }: FileListProps) {
               {file.preview ? (
                 <img
                   src={file.preview}
-                  alt={file.name}
+                  alt={file.fileName}
                   className="h-10 w-10 rounded-md object-cover"
                 />
               ) : (
-                getFileIcon(file.type)
+                getFileIcon(file.mimeType)
               )}
             </div>
 
             {/* Info */}
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-medium text-foreground">
-                {file.name}
+                {file.fileName}
               </p>
               <p className="text-xs text-muted-foreground">
-                {formatFileSize(file.size)}
+                {formatFileSize(file.fileSize)}
               </p>
             </div>
 
