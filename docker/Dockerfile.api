@@ -14,7 +14,8 @@ COPY apps/api/ ./apps/api/
 # Install dependencies
 RUN pnpm install --frozen-lockfile
 
-# Build the database package first (produces dist/ with CJS output)
+# Build workspace packages (produce dist/ with CJS output)
+RUN pnpm --filter @koria/types build
 RUN pnpm --filter @koria/database build
 
 # Build the API
