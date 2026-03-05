@@ -2,7 +2,6 @@ import {
   IsString,
   IsEmail,
   IsOptional,
-  IsUUID,
   IsArray,
   MinLength,
   Matches,
@@ -11,12 +10,9 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class SubmitBriefingDto {
   @ApiProperty()
-  @IsUUID()
-  leadId!: string;
-
-  @ApiProperty()
-  @IsUUID()
-  tenantId!: string;
+  @IsString()
+  @MinLength(5)
+  token!: string;
 
   // ── Contact ──────────────────────────────────────────
   @ApiProperty()

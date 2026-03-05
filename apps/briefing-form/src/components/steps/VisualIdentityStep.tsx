@@ -10,10 +10,10 @@ import type { BriefingFormData } from '@/schemas/briefing.schema';
 const TONE_OPTIONS = ['sophisticated', 'young', 'family', 'investor'] as const;
 
 interface VisualIdentityStepProps {
-  leadId: string;
+  token: string;
 }
 
-export function VisualIdentityStep({ leadId }: VisualIdentityStepProps) {
+export function VisualIdentityStep({ token }: VisualIdentityStepProps) {
   const { t } = useTranslation();
   const { setValue, watch, formState: { errors } } = useFormContext<BriefingFormData>();
   const brandColors = watch('brandColors') ?? [];
@@ -109,7 +109,7 @@ export function VisualIdentityStep({ leadId }: VisualIdentityStepProps) {
           isUploading={isUploading}
           uploadProgress={uploadProgress}
           error={uploadError}
-          onDrop={(file) => uploadFile(file, leadId)}
+          onDrop={(file) => uploadFile(file, token)}
           onRemove={removeFile}
         />
       </FieldWrapper>

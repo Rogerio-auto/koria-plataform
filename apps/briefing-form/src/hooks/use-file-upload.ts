@@ -5,7 +5,7 @@ import { MAX_FILE_SIZES, ALLOWED_MIME_TYPES } from '@koria/utils';
 const ALLOWED_LOGO_TYPES = [...ALLOWED_MIME_TYPES.image, 'image/svg+xml'] as string[];
 
 interface UseFileUploadReturn {
-  uploadFile: (file: File, leadId: string) => Promise<string | null>;
+  uploadFile: (file: File, token: string) => Promise<string | null>;
   uploadProgress: number;
   isUploading: boolean;
   error: string | null;
@@ -29,7 +29,7 @@ export function useFileUpload(): UseFileUploadReturn {
     setUploadProgress(0);
   }, [preview]);
 
-  const uploadFile = useCallback(async (file: File, leadId: string): Promise<string | null> => {
+  const uploadFile = useCallback(async (file: File, token: string): Promise<string | null> => {
     setError(null);
 
     if (!ALLOWED_LOGO_TYPES.includes(file.type)) {
@@ -49,7 +49,7 @@ export function useFileUpload(): UseFileUploadReturn {
     setUploadProgress(30);
 
     try {
-      const result = await briefingApi.uploadLogo(file, leadId);
+      const result = await briefingApi.uploadLogo(file, token);
       setUploadProgress(100);
       setUploadedUrl(result.url);
       return result.url;

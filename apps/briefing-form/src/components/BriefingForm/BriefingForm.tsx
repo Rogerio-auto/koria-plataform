@@ -13,10 +13,10 @@ import {
 } from '@/components/steps';
 
 interface BriefingFormProps {
-  leadId: string;
+  token: string;
 }
 
-export function BriefingForm({ leadId }: BriefingFormProps) {
+export function BriefingForm({ token }: BriefingFormProps) {
   const { t } = useTranslation();
   const {
     form,
@@ -27,7 +27,7 @@ export function BriefingForm({ leadId }: BriefingFormProps) {
     goToStep,
     onSubmit,
     isSubmitting,
-  } = useBriefingForm(leadId);
+  } = useBriefingForm(token);
 
   const stepLabels = [
     t('briefing.steps.property'),
@@ -42,7 +42,7 @@ export function BriefingForm({ leadId }: BriefingFormProps) {
 
   const stepContent = [
     <PropertyInfoStep key="property" />,
-    <VisualIdentityStep key="visual" leadId={leadId} />,
+    <VisualIdentityStep key="visual" token={token} />,
     <CreativeDirectionStep key="creative" />,
     <CommercialInfoStep key="commercial" />,
     <ExtrasStep key="extras" />,

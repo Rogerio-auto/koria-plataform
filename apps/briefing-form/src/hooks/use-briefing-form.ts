@@ -8,7 +8,7 @@ import type { BriefingFormConfig } from '@koria/types';
 const TOTAL_STEPS = 6; // 5 form steps + 1 review
 const DRAFT_KEY = (id: string) => `briefing-draft-${id}`;
 
-export function useBriefingForm(leadId: string) {
+export function useBriefingForm(token: string) {
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoadingConfig, setIsLoadingConfig] = useState(true);
@@ -50,7 +50,7 @@ export function useBriefingForm(leadId: string) {
   useEffect(() => {
     let cancelled = false;
     setIsLoadingConfig(true);
-    briefingApi.getFormConfig(leadId)
+    briefingApi.getFormConfig(token)
       .then((config) => {
         if (cancelled) return;
         setFormConfig(config);
@@ -68,12 +68,12 @@ export function useBriefingForm(leadId: string) {
         if (!cancelled) setIsLoadingConfig(false);
       });
     return () => { cancelled = true; };
-  }, [leadId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [token]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Restore draft from localStorage
   useEffect(() => {
     try {
-      const saved = localStorage.getItem(DRAFT_KEY(leadId));
+      const saved = localStorage.getItem(DRAFT_KEY(token));
       if (saved) {
         const parsed = JSON.parse(saved) as Partial<BriefingFormData>;
         Object.entries(parsed).forEach(([key, value]) => {
@@ -83,17 +83,17 @@ export function useBriefingForm(leadId: string) {
         });
       }
     } catch { /* ignore corrupt drafts */ }
-  }, [leadId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [token]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Auto-save draft on value changes
   useEffect(() => {
     const subscription = form.watch((values) => {
       try {
-        localStorage.setItem(DRAFT_KEY(leadId), JSON.stringify(values));
+        localStorage.setItem(DRAFT_KEY(token), JSON.stringify(values));
       } catch { /* storage full — ignore */ }
     });
     return () => subscription.unsubscribe();
-  }, [leadId, form]);
+  }, [token, form]);
 
   // Step field mapping for partial validation
   const stepFieldNames: (keyof BriefingFormData)[][] = [
@@ -137,8 +137,7 @@ export function useBriefingForm(leadId: string) {
     try {
       const values = form.getValues();
       await briefingApi.submitBriefing({
-        leadId,
-        tenantId: formConfig.tenantId,
+        token,
         fullName: values.fullName,
         email: values.email,
         phoneNumber: values.phoneNumber || undefined,
@@ -163,14 +162,14 @@ export function useBriefingForm(leadId: string) {
         legalDisclaimers: values.legalDisclaimers || undefined,
         additionalNotes: values.additionalNotes || undefined,
       });
-      localStorage.removeItem(DRAFT_KEY(leadId));
+      localStorage.removeItem(DRAFT_KEY(token));
       setSubmitSuccess(true);
     } catch {
       form.setError('root', { message: 'submitFailed' });
     } finally {
       setIsSubmitting(false);
     }
-  }, [leadId, formConfig, form]);
+  }, [token, formConfig, form]);
 
   return {
     form,

@@ -6,7 +6,6 @@ import {
   Body,
   UploadedFile,
   UseInterceptors,
-  ParseUUIDPipe,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiOperation, ApiConsumes } from '@nestjs/swagger';
@@ -18,10 +17,10 @@ import { SubmitBriefingDto } from './dto/submit-briefing.dto';
 export class BriefingController {
   constructor(private readonly briefingService: BriefingService) {}
 
-  @Get(':leadId')
-  @ApiOperation({ summary: 'Get briefing form config for a lead' })
-  async getFormConfig(@Param('leadId', ParseUUIDPipe) leadId: string) {
-    return this.briefingService.getFormConfig(leadId);
+  @Get(':token')
+  @ApiOperation({ summary: 'Get briefing form config by upload token' })
+  async getFormConfig(@Param('token') token: string) {
+    return this.briefingService.getFormConfig(token);
   }
 
   @Post('submit')
@@ -36,8 +35,8 @@ export class BriefingController {
   @UseInterceptors(FileInterceptor('file'))
   async uploadLogo(
     @UploadedFile() file: Express.Multer.File,
-    @Body('leadId', ParseUUIDPipe) leadId: string,
+    @Body('token') token: string,
   ) {
-    return this.briefingService.uploadLogo(leadId, file);
+    return this.briefingService.uploadLogo(token, file);
   }
 }

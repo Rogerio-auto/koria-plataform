@@ -7,7 +7,7 @@ export function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/briefing/:leadId" element={<BriefingPage />} />
+        <Route path="/briefing/:token" element={<BriefingPage />} />
         <Route path="/briefing/success" element={<SuccessPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>

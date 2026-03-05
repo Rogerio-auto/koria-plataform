@@ -6,16 +6,16 @@ import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { useBriefingForm } from '@/hooks/use-briefing-form';
 
 export function BriefingPage() {
-  const { leadId } = useParams<{ leadId: string }>();
+  const { token } = useParams<{ token: string }>();
 
-  if (!leadId) return <Navigate to="/404" replace />;
+  if (!token) return <Navigate to="/404" replace />;
 
-  return <BriefingPageContent leadId={leadId} />;
+  return <BriefingPageContent token={token} />;
 }
 
-function BriefingPageContent({ leadId }: { leadId: string }) {
+function BriefingPageContent({ token }: { token: string }) {
   const { t } = useTranslation();
-  const { isLoadingConfig, configError, submitSuccess } = useBriefingForm(leadId);
+  const { isLoadingConfig, configError, submitSuccess } = useBriefingForm(token);
 
   if (submitSuccess) return <Navigate to="/briefing/success" replace />;
 
@@ -47,7 +47,7 @@ function BriefingPageContent({ leadId }: { leadId: string }) {
             </div>
           </div>
         ) : (
-          <BriefingForm leadId={leadId} />
+          <BriefingForm token={token} />
         )}
       </main>
     </div>

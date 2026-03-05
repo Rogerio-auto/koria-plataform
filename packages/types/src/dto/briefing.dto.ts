@@ -5,8 +5,7 @@
  */
 export interface SubmitBriefingDto {
   // Identification (required)
-  leadId: string;
-  tenantId: string;
+  token: string;
 
   // Personal info
   fullName: string;

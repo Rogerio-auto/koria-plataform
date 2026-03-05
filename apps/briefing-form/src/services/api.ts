@@ -15,8 +15,8 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 }
 
 export const briefingApi = {
-  async getFormConfig(leadId: string): Promise<BriefingFormConfig> {
-    return request<BriefingFormConfig>(`/briefing/${encodeURIComponent(leadId)}`);
+  async getFormConfig(token: string): Promise<BriefingFormConfig> {
+    return request<BriefingFormConfig>(`/briefing/${encodeURIComponent(token)}`);
   },
 
   async submitBriefing(data: SubmitBriefingDto): Promise<BriefingSubmitResponse> {
@@ -26,10 +26,10 @@ export const briefingApi = {
     });
   },
 
-  async uploadLogo(file: File, leadId: string): Promise<{ url: string }> {
+  async uploadLogo(file: File, token: string): Promise<{ url: string }> {
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('leadId', leadId);
+    formData.append('token', token);
     const res = await fetch(`${API_BASE}/briefing/upload-logo`, {
       method: 'POST',
       body: formData,
