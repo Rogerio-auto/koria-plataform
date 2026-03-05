@@ -23,6 +23,9 @@ RUN pnpm install --frozen-lockfile
 # Inject VITE_API_URL at build time
 ENV VITE_API_URL=${VITE_API_URL}
 
+# Build workspace packages that frontends depend on
+RUN pnpm --filter @koria/types build
+
 # Build the frontend app
 RUN pnpm --filter @koria/${APP_NAME} build
 

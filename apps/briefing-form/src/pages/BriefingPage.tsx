@@ -7,7 +7,6 @@ import { useBriefingForm } from '@/hooks/use-briefing-form';
 
 export function BriefingPage() {
   const { leadId } = useParams<{ leadId: string }>();
-  const { t } = useTranslation();
 
   if (!leadId) return <Navigate to="/404" replace />;
 
