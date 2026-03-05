@@ -91,3 +91,27 @@ export enum LeadQualificationStatus {
   Sent = 'sent',
   Completed = 'completed',
 }
+
+export enum CommunicationTone {
+  Sophisticated = 'sophisticated',
+  Young = 'young',
+  Family = 'family',
+  Investor = 'investor',
+}
+
+export enum TargetAudience {
+  YoungCouples = 'young_couples',
+  Investors = 'investors',
+  Families = 'families',
+  Luxury = 'luxury',
+  FirstHome = 'first_home',
+}
+
+export enum MainEmotion {
+  Security = 'security',
+  Freedom = 'freedom',
+  Sophistication = 'sophistication',
+  Nature = 'nature',
+  Comfort = 'comfort',
+  Exclusivity = 'exclusivity',
+}

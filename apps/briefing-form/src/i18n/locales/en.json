@@ -1,43 +1,159 @@
 {
   "briefing": {
-    "title": "Briefing Form",
-    "subtitle": "Fill in your project information",
+    "title": "Property Briefing",
+    "subtitle": "Fill in the details for your video production",
     "steps": {
-      "personal": "Personal Info",
-      "company": "Company",
-      "project": "Project",
-      "references": "References",
+      "property": "Property",
+      "visual": "Visual Identity",
+      "creative": "Creative Direction",
+      "commercial": "Commercial",
+      "extras": "Extras",
       "review": "Review"
     },
-    "fields": {
-      "fullName": "Full Name",
+    "property": {
+      "title": "Property Information",
+      "description": "Technical details of the real estate project",
+      "fullName": "Your full name",
+      "fullNamePlaceholder": "e.g. John Smith",
       "email": "Email",
-      "phone": "Phone",
-      "instagram": "Instagram",
-      "linkedin": "LinkedIn",
-      "website": "Website",
-      "companyName": "Company Name",
-      "companySize": "Company Size",
-      "industry": "Industry",
-      "role": "Role",
-      "projectType": "Project Type",
-      "projectGoal": "Project Goal",
-      "description": "Description",
-      "deadline": "Deadline",
-      "budget": "Budget",
-      "references": "Reference URLs",
-      "howFoundUs": "How did you find us?",
-      "notes": "Additional Notes"
+      "emailPlaceholder": "your@email.com",
+      "phoneNumber": "Phone / WhatsApp",
+      "phoneNumberPlaceholder": "+1 (555) 000-0000",
+      "propertyName": "Official property name",
+      "propertyNamePlaceholder": "e.g. Ocean View Residences",
+      "propertyAddress": "Full address",
+      "propertyAddressPlaceholder": "Street, number, neighborhood, city — state",
+      "propertyUnits": "Number of units / towers / lots",
+      "propertyUnitsPlaceholder": "e.g. 2 towers, 180 units",
+      "propertyUnitSizes": "Unit sizes",
+      "propertyUnitSizesPlaceholder": "e.g. apartments from 500 to 1,300 sq ft",
+      "propertyDifferentials": "Property highlights",
+      "propertyDifferentialsPlaceholder": "e.g. pool, gym, ocean view...",
+      "propertyDifferentialsHint": "Press Enter to add"
+    },
+    "visual": {
+      "title": "Visual Identity",
+      "description": "Brand colors, logo and visual references",
+      "brandColors": "Brand colors (hex)",
+      "brandColorsPlaceholder": "#8B5CF6",
+      "brandColorsHint": "Click + to add colors",
+      "hasLogo": "Do you have a logo?",
+      "logoUpload": "Drag your logo here or click to upload",
+      "logoFormats": "PNG, JPG, SVG or WebP — max 5MB",
+      "communicationTone": "Communication tone",
+      "toneOptions": {
+        "sophisticated": "Sophisticated",
+        "young": "Young / Modern",
+        "family": "Family / Cozy",
+        "investor": "Investor / Premium"
+      },
+      "visualReferences": "Visual references",
+      "visualReferencesPlaceholder": "Paste a video URL you liked",
+      "visualReferencesHint": "Links to videos, websites or reference images"
+    },
+    "creative": {
+      "title": "Creative Direction",
+      "description": "Define the audience, emotion and video elements",
+      "targetAudience": "Main target audience",
+      "audienceOptions": {
+        "young_couples": "Young Couples",
+        "investors": "Investors",
+        "families": "Families",
+        "luxury": "High-End / Luxury",
+        "first_home": "First Home Buyers"
+      },
+      "mainEmotion": "Main emotion to convey",
+      "emotionOptions": {
+        "security": "Security",
+        "freedom": "Freedom",
+        "sophistication": "Sophistication",
+        "nature": "Nature / Wellness",
+        "comfort": "Comfort",
+        "exclusivity": "Exclusivity"
+      },
+      "mandatoryElements": "Mandatory video elements",
+      "mandatoryElementsPlaceholder": "e.g. facade, leisure area...",
+      "mandatoryElementsHint": "What must be included in the video",
+      "elementsToAvoid": "Elements to AVOID",
+      "elementsToAvoidPlaceholder": "e.g. competitors, construction...",
+      "elementsToAvoidHint": "What should not appear in the video"
+    },
+    "commercial": {
+      "title": "Commercial Information",
+      "description": "Pricing, conditions and contact details",
+      "priceRange": "Unit price range",
+      "priceRangePlaceholder": "e.g. $200,000 to $600,000",
+      "paymentConditions": "Featured payment conditions",
+      "paymentConditionsPlaceholder": "e.g. easy down payment, installments from $1,000",
+      "launchDate": "Expected launch / delivery date",
+      "launchDatePlaceholder": "e.g. March 2027",
+      "realtorContact": "Realtor / sales office contact",
+      "realtorContactPlaceholder": "e.g. (555) 000-0000 or realtor name"
+    },
+    "extras": {
+      "title": "Extras",
+      "description": "Voiceover, music and additional info",
+      "voiceoverText": "Voiceover script (if any)",
+      "voiceoverTextPlaceholder": "Paste the narration text you'd like for the video...",
+      "musicPreference": "Music preference / style",
+      "musicPreferencePlaceholder": "e.g. soft and sophisticated, light electronic, etc.",
+      "legalDisclaimers": "Legal restrictions / mandatory disclaimers",
+      "legalDisclaimersPlaceholder": "e.g. \"Images for illustration purposes only\"...",
+      "additionalNotes": "Additional notes",
+      "additionalNotesPlaceholder": "Anything else we should know?"
+    },
+    "review": {
+      "title": "Briefing Review",
+      "description": "Review the information before submitting",
+      "sectionProperty": "Property",
+      "sectionVisual": "Visual Identity",
+      "sectionCreative": "Creative Direction",
+      "sectionCommercial": "Commercial",
+      "sectionExtras": "Extras",
+      "edit": "Edit",
+      "notProvided": "Not provided",
+      "colors": "Colors",
+      "logo": "Logo",
+      "logoUploaded": "Logo uploaded",
+      "tone": "Tone",
+      "references": "References",
+      "audience": "Audience",
+      "emotion": "Emotion",
+      "mandatory": "Mandatory",
+      "avoid": "Avoid"
     },
     "actions": {
       "next": "Next",
       "previous": "Previous",
       "submit": "Submit Briefing",
-      "uploading": "Uploading..."
+      "submitting": "Submitting..."
     },
     "success": {
-      "title": "Briefing Submitted!",
-      "message": "Thank you! We'll be in touch soon."
+      "title": "Briefing Submitted Successfully!",
+      "message": "Thank you! Our team will review the information and get in touch soon.",
+      "subtitle": "Next steps",
+      "step1": "Our team will review the briefing",
+      "step2": "We'll contact you to align details",
+      "step3": "Video production will begin"
+    },
+    "errors": {
+      "loadFailed": "Could not load the form",
+      "submitFailed": "Error submitting the briefing. Please try again.",
+      "invalidLink": "Invalid or expired link",
+      "alreadySubmitted": "This briefing has already been submitted"
+    },
+    "validation": {
+      "required": "Required field",
+      "invalidEmail": "Invalid email",
+      "minLength": "Minimum {{min}} characters",
+      "invalidUrl": "Invalid URL",
+      "invalidColor": "Invalid color (use #RRGGBB format)"
     }
+  },
+  "language": {
+    "label": "Language",
+    "pt-BR": "Português",
+    "en": "English",
+    "es": "Español"
   }
 }

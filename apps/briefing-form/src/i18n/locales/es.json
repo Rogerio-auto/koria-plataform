@@ -1,43 +1,159 @@
 {
   "briefing": {
-    "title": "Formulario de Briefing",
-    "subtitle": "Complete la información de su proyecto",
+    "title": "Briefing del Emprendimiento",
+    "subtitle": "Complete la información para la producción de su video",
     "steps": {
-      "personal": "Datos Personales",
-      "company": "Empresa",
-      "project": "Proyecto",
-      "references": "Referencias",
+      "property": "Emprendimiento",
+      "visual": "Identidad Visual",
+      "creative": "Dirección Creativa",
+      "commercial": "Comercial",
+      "extras": "Extras",
       "review": "Revisión"
     },
-    "fields": {
-      "fullName": "Nombre Completo",
-      "email": "Correo Electrónico",
-      "phone": "Teléfono",
-      "instagram": "Instagram",
-      "linkedin": "LinkedIn",
-      "website": "Sitio Web",
-      "companyName": "Nombre de la Empresa",
-      "companySize": "Tamaño de la Empresa",
-      "industry": "Industria",
-      "role": "Cargo",
-      "projectType": "Tipo de Proyecto",
-      "projectGoal": "Objetivo del Proyecto",
-      "description": "Descripción",
-      "deadline": "Plazo",
-      "budget": "Presupuesto",
-      "references": "URLs de Referencia",
-      "howFoundUs": "¿Cómo nos encontró?",
-      "notes": "Notas Adicionales"
+    "property": {
+      "title": "Información del Emprendimiento",
+      "description": "Datos técnicos del proyecto inmobiliario",
+      "fullName": "Su nombre completo",
+      "fullNamePlaceholder": "Ej: Juan García",
+      "email": "Correo electrónico",
+      "emailPlaceholder": "su@email.com",
+      "phoneNumber": "Teléfono / WhatsApp",
+      "phoneNumberPlaceholder": "+54 (11) 9999-9999",
+      "propertyName": "Nombre oficial del emprendimiento",
+      "propertyNamePlaceholder": "Ej: Residencial Vista al Mar",
+      "propertyAddress": "Dirección completa",
+      "propertyAddressPlaceholder": "Calle, número, barrio, ciudad — provincia",
+      "propertyUnits": "Número de unidades / torres / lotes",
+      "propertyUnitsPlaceholder": "Ej: 2 torres, 180 unidades",
+      "propertyUnitSizes": "Metraje de las unidades",
+      "propertyUnitSizesPlaceholder": "Ej: departamentos de 45m² a 120m²",
+      "propertyDifferentials": "Diferenciales del proyecto",
+      "propertyDifferentialsPlaceholder": "Ej: piscina, gimnasio, vista al mar...",
+      "propertyDifferentialsHint": "Presione Enter para agregar"
+    },
+    "visual": {
+      "title": "Identidad Visual",
+      "description": "Colores, logo y referencias visuales del emprendimiento",
+      "brandColors": "Colores de la marca (hex)",
+      "brandColorsPlaceholder": "#8B5CF6",
+      "brandColorsHint": "Haga clic en + para agregar colores",
+      "hasLogo": "¿Tiene logotipo?",
+      "logoUpload": "Arrastre el logo aquí o haga clic para enviar",
+      "logoFormats": "PNG, JPG, SVG o WebP — máx. 5MB",
+      "communicationTone": "Tono de comunicación",
+      "toneOptions": {
+        "sophisticated": "Sofisticado",
+        "young": "Joven / Moderno",
+        "family": "Familiar / Acogedor",
+        "investor": "Inversionista / Premium"
+      },
+      "visualReferences": "Referencias visuales",
+      "visualReferencesPlaceholder": "Pegue la URL de un video que le gustó",
+      "visualReferencesHint": "Enlaces de videos, sitios o imágenes de referencia"
+    },
+    "creative": {
+      "title": "Dirección Creativa",
+      "description": "Defina el público, emoción y elementos del video",
+      "targetAudience": "Público objetivo principal",
+      "audienceOptions": {
+        "young_couples": "Parejas Jóvenes",
+        "investors": "Inversionistas",
+        "families": "Familias",
+        "luxury": "Alto Estándar / Lujo",
+        "first_home": "Primera Vivienda"
+      },
+      "mainEmotion": "Emoción principal a transmitir",
+      "emotionOptions": {
+        "security": "Seguridad",
+        "freedom": "Libertad",
+        "sophistication": "Sofisticación",
+        "nature": "Naturaleza / Bienestar",
+        "comfort": "Confort",
+        "exclusivity": "Exclusividad"
+      },
+      "mandatoryElements": "Elementos obligatorios en el video",
+      "mandatoryElementsPlaceholder": "Ej: fachada, área de recreación...",
+      "mandatoryElementsHint": "Lo que no puede faltar en el video",
+      "elementsToAvoid": "Elementos a EVITAR",
+      "elementsToAvoidPlaceholder": "Ej: competencia, construcción aparente...",
+      "elementsToAvoidHint": "Lo que no debe aparecer en el video"
+    },
+    "commercial": {
+      "title": "Información Comercial",
+      "description": "Datos de precio, condiciones y contacto",
+      "priceRange": "Rango de precios de las unidades",
+      "priceRangePlaceholder": "Ej: USD 100.000 a USD 350.000",
+      "paymentConditions": "Condiciones de pago destacadas",
+      "paymentConditionsPlaceholder": "Ej: entrada facilitada, cuotas de USD 500",
+      "launchDate": "Fecha prevista de lanzamiento / entrega",
+      "launchDatePlaceholder": "Ej: Marzo 2027",
+      "realtorContact": "Contacto del corredor / sala de ventas",
+      "realtorContactPlaceholder": "Ej: (11) 9999-9999 o nombre del corredor"
+    },
+    "extras": {
+      "title": "Extras",
+      "description": "Locución, música e información adicional",
+      "voiceoverText": "Texto para locución (si tiene)",
+      "voiceoverTextPlaceholder": "Pegue aquí el texto que desea para la narración del video...",
+      "musicPreference": "Preferencia de música / estilo",
+      "musicPreferencePlaceholder": "Ej: música suave y sofisticada, electrónica ligera, etc.",
+      "legalDisclaimers": "Restricciones legales / disclaimers obligatorios",
+      "legalDisclaimersPlaceholder": "Ej: \"Imágenes meramente ilustrativas\"...",
+      "additionalNotes": "Observaciones adicionales",
+      "additionalNotesPlaceholder": "¿Algo más que debamos saber?"
+    },
+    "review": {
+      "title": "Revisión del Briefing",
+      "description": "Verifique la información antes de enviar",
+      "sectionProperty": "Emprendimiento",
+      "sectionVisual": "Identidad Visual",
+      "sectionCreative": "Dirección Creativa",
+      "sectionCommercial": "Comercial",
+      "sectionExtras": "Extras",
+      "edit": "Editar",
+      "notProvided": "No informado",
+      "colors": "Colores",
+      "logo": "Logo",
+      "logoUploaded": "Logo enviado",
+      "tone": "Tono",
+      "references": "Referencias",
+      "audience": "Público objetivo",
+      "emotion": "Emoción",
+      "mandatory": "Obligatorios",
+      "avoid": "Evitar"
     },
     "actions": {
       "next": "Siguiente",
       "previous": "Anterior",
       "submit": "Enviar Briefing",
-      "uploading": "Enviando..."
+      "submitting": "Enviando..."
     },
     "success": {
-      "title": "¡Briefing Enviado!",
-      "message": "¡Gracias! Nos pondremos en contacto pronto."
+      "title": "¡Briefing Enviado con Éxito!",
+      "message": "¡Gracias! Nuestro equipo analizará la información y se pondrá en contacto pronto.",
+      "subtitle": "Próximos pasos",
+      "step1": "Nuestro equipo revisará el briefing",
+      "step2": "Nos pondremos en contacto para alinear detalles",
+      "step3": "La producción del video será iniciada"
+    },
+    "errors": {
+      "loadFailed": "No fue posible cargar el formulario",
+      "submitFailed": "Error al enviar el briefing. Intente nuevamente.",
+      "invalidLink": "Enlace inválido o expirado",
+      "alreadySubmitted": "Este briefing ya fue enviado anteriormente"
+    },
+    "validation": {
+      "required": "Campo obligatorio",
+      "invalidEmail": "Correo electrónico inválido",
+      "minLength": "Mínimo {{min}} caracteres",
+      "invalidUrl": "URL inválida",
+      "invalidColor": "Color inválido (use formato #RRGGBB)"
     }
+  },
+  "language": {
+    "label": "Idioma",
+    "pt-BR": "Português",
+    "en": "English",
+    "es": "Español"
   }
 }

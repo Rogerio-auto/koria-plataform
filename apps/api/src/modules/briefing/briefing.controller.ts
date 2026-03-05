@@ -1,30 +1,43 @@
-import { Controller, Get, Post, Param, Body } from '@nestjs/common';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Post,
+  Param,
+  Body,
+  UploadedFile,
+  UseInterceptors,
+  ParseUUIDPipe,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiTags, ApiOperation, ApiConsumes } from '@nestjs/swagger';
 import { BriefingService } from './briefing.service';
+import { SubmitBriefingDto } from './dto/submit-briefing.dto';
 
 @ApiTags('Briefing')
 @Controller('briefing')
 export class BriefingController {
-  constructor(readonly briefingService: BriefingService) {}
+  constructor(private readonly briefingService: BriefingService) {}
 
   @Get(':leadId')
   @ApiOperation({ summary: 'Get briefing form config for a lead' })
-  async getFormConfig(@Param('leadId') _leadId: string) {
-    // TODO: Return form config and lead info
-    return { message: 'Get briefing config — not yet implemented' };
+  async getFormConfig(@Param('leadId', ParseUUIDPipe) leadId: string) {
+    return this.briefingService.getFormConfig(leadId);
   }
 
   @Post('submit')
   @ApiOperation({ summary: 'Submit briefing form data' })
-  async submit(@Body() _body: unknown) {
-    // TODO: Validate with SubmitBriefingDto, save to lead_qualification
-    return { message: 'Submit briefing — not yet implemented' };
+  async submit(@Body() dto: SubmitBriefingDto) {
+    return this.briefingService.submitBriefing(dto);
   }
 
   @Post('upload-logo')
   @ApiOperation({ summary: 'Upload logo file' })
-  async uploadLogo() {
-    // TODO: Handle file upload via Multer, save to S3
-    return { message: 'Upload logo — not yet implemented' };
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadLogo(
+    @UploadedFile() file: Express.Multer.File,
+    @Body('leadId', ParseUUIDPipe) leadId: string,
+  ) {
+    return this.briefingService.uploadLogo(leadId, file);
   }
 }

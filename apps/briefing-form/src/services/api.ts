@@ -1,26 +1,43 @@
-/**
- * API client for the briefing form.
- * TODO: Implement HTTP calls to the API.
- */
+import type { SubmitBriefingDto, BriefingSubmitResponse, BriefingFormConfig } from '@koria/types';
 
 export const API_BASE = import.meta.env.VITE_API_URL || '/api/v1';
 
+async function request<T>(path: string, options?: RequestInit): Promise<T> {
+  const res = await fetch(`${API_BASE}${path}`, {
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    ...options,
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => null);
+    throw new Error(body?.message || `Request failed: ${res.status}`);
+  }
+  return res.json();
+}
+
 export const briefingApi = {
-  /** Get form configuration for a specific lead */
-  async getFormConfig(_leadId: string) {
-    // TODO: GET /briefing/:leadId
-    return null;
+  async getFormConfig(leadId: string): Promise<BriefingFormConfig> {
+    return request<BriefingFormConfig>(`/briefing/${encodeURIComponent(leadId)}`);
   },
 
-  /** Submit briefing form data */
-  async submitBriefing(_data: unknown) {
-    // TODO: POST /briefing/submit
-    return null;
+  async submitBriefing(data: SubmitBriefingDto): Promise<BriefingSubmitResponse> {
+    return request<BriefingSubmitResponse>('/briefing/submit', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
   },
 
-  /** Upload logo file */
-  async uploadLogo(_file: File) {
-    // TODO: POST /briefing/upload-logo (multipart)
-    return null;
+  async uploadLogo(file: File, leadId: string): Promise<{ url: string }> {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('leadId', leadId);
+    const res = await fetch(`${API_BASE}/briefing/upload-logo`, {
+      method: 'POST',
+      body: formData,
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => null);
+      throw new Error(body?.message || 'Upload failed');
+    }
+    return res.json();
   },
 };

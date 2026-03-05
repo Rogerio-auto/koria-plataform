@@ -1,43 +1,159 @@
 {
   "briefing": {
-    "title": "Formulário de Briefing",
-    "subtitle": "Preencha as informações do seu projeto",
+    "title": "Briefing do Empreendimento",
+    "subtitle": "Preencha as informações para produção do seu vídeo",
     "steps": {
-      "personal": "Dados Pessoais",
-      "company": "Empresa",
-      "project": "Projeto",
-      "references": "Referências",
+      "property": "Empreendimento",
+      "visual": "Identidade Visual",
+      "creative": "Direção Criativa",
+      "commercial": "Comercial",
+      "extras": "Extras",
       "review": "Revisão"
     },
-    "fields": {
-      "fullName": "Nome Completo",
+    "property": {
+      "title": "Informações do Empreendimento",
+      "description": "Dados técnicos do projeto imobiliário",
+      "fullName": "Seu nome completo",
+      "fullNamePlaceholder": "Ex: João Silva",
       "email": "E-mail",
-      "phone": "Telefone",
-      "instagram": "Instagram",
-      "linkedin": "LinkedIn",
-      "website": "Website",
-      "companyName": "Nome da Empresa",
-      "companySize": "Tamanho da Empresa",
-      "industry": "Segmento",
-      "role": "Cargo",
-      "projectType": "Tipo de Projeto",
-      "projectGoal": "Objetivo do Projeto",
-      "description": "Descrição",
-      "deadline": "Prazo",
-      "budget": "Orçamento",
-      "references": "URLs de Referência",
-      "howFoundUs": "Como nos encontrou?",
-      "notes": "Observações"
+      "emailPlaceholder": "seu@email.com",
+      "phoneNumber": "Telefone / WhatsApp",
+      "phoneNumberPlaceholder": "+55 (11) 99999-9999",
+      "propertyName": "Nome oficial do empreendimento",
+      "propertyNamePlaceholder": "Ex: Residencial Vista Mar",
+      "propertyAddress": "Endereço completo",
+      "propertyAddressPlaceholder": "Rua, número, bairro, cidade — UF",
+      "propertyUnits": "Número de unidades / torres / lotes",
+      "propertyUnitsPlaceholder": "Ex: 2 torres, 180 unidades",
+      "propertyUnitSizes": "Metragem das unidades",
+      "propertyUnitSizesPlaceholder": "Ex: apartamentos de 45m² a 120m²",
+      "propertyDifferentials": "Diferenciais do projeto",
+      "propertyDifferentialsPlaceholder": "Ex: piscina, academia, vista mar...",
+      "propertyDifferentialsHint": "Pressione Enter para adicionar"
+    },
+    "visual": {
+      "title": "Identidade Visual",
+      "description": "Cores, logo e referências visuais do empreendimento",
+      "brandColors": "Cores da marca (hex)",
+      "brandColorsPlaceholder": "#8B5CF6",
+      "brandColorsHint": "Clique em + para adicionar cores",
+      "hasLogo": "Tem logotipo?",
+      "logoUpload": "Arraste o logo aqui ou clique para enviar",
+      "logoFormats": "PNG, JPG, SVG ou WebP — máx. 5MB",
+      "communicationTone": "Tom de comunicação",
+      "toneOptions": {
+        "sophisticated": "Sofisticado",
+        "young": "Jovem / Moderno",
+        "family": "Familiar / Acolhedor",
+        "investor": "Investidor / Premium"
+      },
+      "visualReferences": "Referências visuais",
+      "visualReferencesPlaceholder": "Cole a URL de um vídeo que gostou",
+      "visualReferencesHint": "Links de vídeos, sites ou imagens de referência"
+    },
+    "creative": {
+      "title": "Direção Criativa",
+      "description": "Defina o público, emoção e elementos do vídeo",
+      "targetAudience": "Público-alvo principal",
+      "audienceOptions": {
+        "young_couples": "Jovens Casais",
+        "investors": "Investidores",
+        "families": "Famílias",
+        "luxury": "Alto Padrão / Luxo",
+        "first_home": "Primeiro Imóvel"
+      },
+      "mainEmotion": "Emoção principal a transmitir",
+      "emotionOptions": {
+        "security": "Segurança",
+        "freedom": "Liberdade",
+        "sophistication": "Sofisticação",
+        "nature": "Natureza / Bem-estar",
+        "comfort": "Conforto",
+        "exclusivity": "Exclusividade"
+      },
+      "mandatoryElements": "Elementos obrigatórios no vídeo",
+      "mandatoryElementsPlaceholder": "Ex: fachada, área de lazer...",
+      "mandatoryElementsHint": "O que não pode faltar no vídeo",
+      "elementsToAvoid": "Elementos a EVITAR",
+      "elementsToAvoidPlaceholder": "Ex: concorrência, construção aparente...",
+      "elementsToAvoidHint": "O que não deve aparecer no vídeo"
+    },
+    "commercial": {
+      "title": "Informações Comerciais",
+      "description": "Dados de preço, condições e contato",
+      "priceRange": "Faixa de preço das unidades",
+      "priceRangePlaceholder": "Ex: R$ 350.000 a R$ 850.000",
+      "paymentConditions": "Condições de pagamento destacadas",
+      "paymentConditionsPlaceholder": "Ex: entrada facilitada, parcelas de R$ 1.500",
+      "launchDate": "Data prevista de lançamento / entrega",
+      "launchDatePlaceholder": "Ex: Março 2027",
+      "realtorContact": "Contato do corretor / plantão de vendas",
+      "realtorContactPlaceholder": "Ex: (11) 99999-9999 ou nome do corretor"
+    },
+    "extras": {
+      "title": "Extras",
+      "description": "Locução, música e informações adicionais",
+      "voiceoverText": "Texto para locução (se tiver)",
+      "voiceoverTextPlaceholder": "Cole aqui o texto que deseja para a narração do vídeo...",
+      "musicPreference": "Preferência de música / estilo",
+      "musicPreferencePlaceholder": "Ex: música suave e sofisticada, eletrônica leve, etc.",
+      "legalDisclaimers": "Restrições legais / disclaimers obrigatórios",
+      "legalDisclaimersPlaceholder": "Ex: \"Imagens meramente ilustrativas\", registro CRECI...",
+      "additionalNotes": "Observações adicionais",
+      "additionalNotesPlaceholder": "Algo mais que devemos saber?"
+    },
+    "review": {
+      "title": "Revisão do Briefing",
+      "description": "Confira as informações antes de enviar",
+      "sectionProperty": "Empreendimento",
+      "sectionVisual": "Identidade Visual",
+      "sectionCreative": "Direção Criativa",
+      "sectionCommercial": "Comercial",
+      "sectionExtras": "Extras",
+      "edit": "Editar",
+      "notProvided": "Não informado",
+      "colors": "Cores",
+      "logo": "Logo",
+      "logoUploaded": "Logo enviado",
+      "tone": "Tom",
+      "references": "Referências",
+      "audience": "Público-alvo",
+      "emotion": "Emoção",
+      "mandatory": "Obrigatórios",
+      "avoid": "Evitar"
     },
     "actions": {
       "next": "Próximo",
       "previous": "Anterior",
       "submit": "Enviar Briefing",
-      "uploading": "Enviando..."
+      "submitting": "Enviando..."
     },
     "success": {
-      "title": "Briefing Enviado!",
-      "message": "Obrigado! Entraremos em contato em breve."
+      "title": "Briefing Enviado com Sucesso!",
+      "message": "Obrigado! Nossa equipe vai analisar as informações e entrar em contato em breve.",
+      "subtitle": "Próximos passos",
+      "step1": "Nossa equipe vai analisar o briefing",
+      "step2": "Entraremos em contato para alinhar detalhes",
+      "step3": "A produção do vídeo será iniciada"
+    },
+    "errors": {
+      "loadFailed": "Não foi possível carregar o formulário",
+      "submitFailed": "Erro ao enviar o briefing. Tente novamente.",
+      "invalidLink": "Link inválido ou expirado",
+      "alreadySubmitted": "Este briefing já foi enviado anteriormente"
+    },
+    "validation": {
+      "required": "Campo obrigatório",
+      "invalidEmail": "E-mail inválido",
+      "minLength": "Mínimo de {{min}} caracteres",
+      "invalidUrl": "URL inválida",
+      "invalidColor": "Cor inválida (use formato #RRGGBB)"
     }
+  },
+  "language": {
+    "label": "Idioma",
+    "pt-BR": "Português",
+    "en": "English",
+    "es": "Español"
   }
 }

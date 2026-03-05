@@ -1,5 +1,6 @@
 /**
  * core.lead_qualification — Detailed lead qualification data (briefing form)
+ * Includes real-estate video production briefing fields.
  */
 import { uuid, text, integer, timestamp } from 'drizzle-orm/pg-core';
 import { coreSchema, tenants } from './tenants';
@@ -14,6 +15,8 @@ export const leadQualification = coreSchema.table('lead_qualification', {
   status: leadQualificationStatusEnum('status').notNull().default('pending'),
   formSentAt: timestamp('form_sent_at', { withTimezone: true }),
   formSentCount: integer('form_sent_count').default(0),
+
+  // ── Personal / Contact ───────────────────────────────
   fullName: text('full_name'),
   email: text('email'),
   phoneNumber: text('phone_number'),
@@ -21,15 +24,50 @@ export const leadQualification = coreSchema.table('lead_qualification', {
   instagramCompany: text('instagram_company'),
   linkedinUrl: text('linkedin_url'),
   websiteUrl: text('website_url'),
+
+  // ── Company ──────────────────────────────────────────
   companyName: text('company_name'),
   companySize: text('company_size'),
   industry: text('industry'),
   roleInCompany: text('role_in_company'),
+
+  // ── Legacy generic project fields ────────────────────
   projectType: text('project_type'),
   projectGoal: text('project_goal'),
   projectDescription: text('project_description'),
   deadline: text('deadline'),
   budgetRange: text('budget_range'),
+
+  // ── 1. Property / Real-estate Info ───────────────────
+  propertyName: text('property_name'),
+  propertyAddress: text('property_address'),
+  propertyUnits: text('property_units'),
+  propertyUnitSizes: text('property_unit_sizes'),
+  propertyDifferentials: text('property_differentials').array(),
+
+  // ── 2. Visual Identity ───────────────────────────────
+  brandColors: text('brand_colors').array(),
+  communicationTone: text('communication_tone'),
+  visualReferences: text('visual_references').array(),
+
+  // ── 3. Creative Direction ────────────────────────────
+  targetAudience: text('target_audience'),
+  mainEmotion: text('main_emotion'),
+  mandatoryElements: text('mandatory_elements').array(),
+  elementsToAvoid: text('elements_to_avoid').array(),
+
+  // ── 4. Commercial Info ───────────────────────────────
+  priceRange: text('price_range'),
+  paymentConditions: text('payment_conditions'),
+  launchDate: text('launch_date'),
+  realtorContact: text('realtor_contact'),
+
+  // ── 5. Extras ────────────────────────────────────────
+  voiceoverText: text('voiceover_text'),
+  musicPreference: text('music_preference'),
+  legalDisclaimers: text('legal_disclaimers'),
+
+  // ── References & Meta ────────────────────────────────
   referencesUrls: text('references_urls').array(),
   howFoundUs: text('how_found_us'),
   additionalNotes: text('additional_notes'),

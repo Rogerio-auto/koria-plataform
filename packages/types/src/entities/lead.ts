@@ -51,6 +51,31 @@ export interface LeadQualification {
   projectDescription: string | null;
   deadline: string | null;
   budgetRange: string | null;
+  // Property / Real-estate info
+  propertyName: string | null;
+  propertyAddress: string | null;
+  propertyUnits: string | null;
+  propertyUnitSizes: string | null;
+  propertyDifferentials: string[] | null;
+  // Visual identity
+  brandColors: string[] | null;
+  communicationTone: string | null;
+  visualReferences: string[] | null;
+  // Creative direction
+  targetAudience: string | null;
+  mainEmotion: string | null;
+  mandatoryElements: string[] | null;
+  elementsToAvoid: string[] | null;
+  // Commercial info
+  priceRange: string | null;
+  paymentConditions: string | null;
+  launchDate: string | null;
+  realtorContact: string | null;
+  // Extras
+  voiceoverText: string | null;
+  musicPreference: string | null;
+  legalDisclaimers: string | null;
+  // References & Meta
   referencesUrls: string[] | null;
   howFoundUs: string | null;
   additionalNotes: string | null;

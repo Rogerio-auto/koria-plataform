@@ -1,43 +1,71 @@
 /**
- * Zod validation schema for briefing form.
- * TODO: Align with SubmitBriefingDto in the API.
+ * Zod validation schema for the multi-step real-estate briefing form.
+ * Each step has its own schema for per-step validation.
  */
 import { z } from 'zod';
 
-export const personalInfoSchema = z.object({
-  fullName: z.string().min(2, 'Nome é obrigatório'),
-  email: z.string().email('E-mail inválido'),
-  phoneNumber: z.string().optional(),
-  instagramPersonal: z.string().optional(),
-  linkedinUrl: z.string().url().optional().or(z.literal('')),
+// ── Step 1: Property Info ──────────────────────────────
+export const propertyInfoSchema = z.object({
+  propertyName: z.string().min(2),
+  propertyAddress: z.string().min(5),
+  propertyUnits: z.string().optional(),
+  propertyUnitSizes: z.string().optional(),
+  propertyDifferentials: z.array(z.string()).optional(),
 });
 
-export const companyInfoSchema = z.object({
-  companyName: z.string().optional(),
-  companySize: z.string().optional(),
-  industry: z.string().optional(),
-  roleInCompany: z.string().optional(),
-  websiteUrl: z.string().url().optional().or(z.literal('')),
-  instagramCompany: z.string().optional(),
+// ── Step 2: Visual Identity ────────────────────────────
+export const visualIdentitySchema = z.object({
+  brandColors: z.array(z.string().regex(/^#[0-9a-fA-F]{6}$/)).optional(),
+  communicationTone: z.string().optional(),
+  visualReferences: z.array(z.string().url()).optional(),
 });
 
-export const projectInfoSchema = z.object({
-  projectType: z.string().min(1, 'Tipo de projeto é obrigatório'),
-  projectGoal: z.string().min(1, 'Objetivo é obrigatório'),
-  projectDescription: z.string().optional(),
-  deadline: z.string().optional(),
-  budgetRange: z.string().optional(),
+// ── Step 3: Creative Direction ─────────────────────────
+export const creativeDirectionSchema = z.object({
+  targetAudience: z.string().min(1),
+  mainEmotion: z.string().min(1),
+  mandatoryElements: z.array(z.string()).optional(),
+  elementsToAvoid: z.array(z.string()).optional(),
 });
 
-export const referencesSchema = z.object({
-  referencesUrls: z.array(z.string().url()).optional(),
-  howFoundUs: z.string().optional(),
+// ── Step 4: Commercial Info ────────────────────────────
+export const commercialInfoSchema = z.object({
+  priceRange: z.string().optional(),
+  paymentConditions: z.string().optional(),
+  launchDate: z.string().optional(),
+  realtorContact: z.string().optional(),
+});
+
+// ── Step 5: Extras ─────────────────────────────────────
+export const extrasSchema = z.object({
+  voiceoverText: z.string().optional(),
+  musicPreference: z.string().optional(),
+  legalDisclaimers: z.string().optional(),
   additionalNotes: z.string().optional(),
 });
 
-export const briefingFormSchema = personalInfoSchema
-  .merge(companyInfoSchema)
-  .merge(projectInfoSchema)
-  .merge(referencesSchema);
+// ── Contact info (collected in step 1 alongside property) ──
+export const contactInfoSchema = z.object({
+  fullName: z.string().min(2),
+  email: z.string().email(),
+  phoneNumber: z.string().optional(),
+});
+
+// ── Merged full schema ─────────────────────────────────
+export const briefingFormSchema = contactInfoSchema
+  .merge(propertyInfoSchema)
+  .merge(visualIdentitySchema)
+  .merge(creativeDirectionSchema)
+  .merge(commercialInfoSchema)
+  .merge(extrasSchema);
 
 export type BriefingFormData = z.infer<typeof briefingFormSchema>;
+
+/** Step schemas indexed by step number (0-based). Step 5 is review (no schema). */
+export const stepSchemas = [
+  contactInfoSchema.merge(propertyInfoSchema),
+  visualIdentitySchema,
+  creativeDirectionSchema,
+  commercialInfoSchema,
+  extrasSchema,
+] as const;

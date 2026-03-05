@@ -1,12 +1,15 @@
-/**
- * 404 page — shown for invalid routes or expired lead links.
- */
+import { useTranslation } from 'react-i18next';
+import { FileQuestion } from 'lucide-react';
+
 export function NotFoundPage() {
+  const { t } = useTranslation();
+
   return (
-    <div className="flex min-h-[60vh] items-center justify-center">
-      <div className="text-center">
+    <div className="min-h-screen bg-background flex items-center justify-center px-4">
+      <div className="text-center space-y-4">
+        <FileQuestion className="mx-auto h-16 w-16 text-muted-foreground" />
         <h2 className="text-2xl font-bold">404</h2>
-        <p className="mt-2 text-muted-foreground">Página não encontrada</p>
+        <p className="text-muted-foreground">{t('briefing.errors.invalidLink')}</p>
       </div>
     </div>
   );

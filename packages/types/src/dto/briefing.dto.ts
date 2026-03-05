@@ -1,6 +1,7 @@
 /**
  * DTO for submitting the briefing form.
  * Maps to core.lead_qualification columns.
+ * Tailored for real-estate video production briefing.
  */
 export interface SubmitBriefingDto {
   // Identification (required)
@@ -24,17 +25,45 @@ export interface SubmitBriefingDto {
   industry?: string;
   roleInCompany?: string;
 
-  // Project info
+  // Legacy generic project fields
   projectType?: string;
   projectGoal?: string;
   projectDescription?: string;
   deadline?: string;
   budgetRange?: string;
 
-  // References
-  referencesUrls?: string[];
+  // 1. Property / Real-estate info
+  propertyName: string;
+  propertyAddress: string;
+  propertyUnits?: string;
+  propertyUnitSizes?: string;
+  propertyDifferentials?: string[];
 
-  // Other
+  // 2. Visual identity
+  brandColors?: string[];
+  logoUrl?: string;
+  communicationTone?: string;
+  visualReferences?: string[];
+
+  // 3. Creative direction
+  targetAudience?: string;
+  mainEmotion?: string;
+  mandatoryElements?: string[];
+  elementsToAvoid?: string[];
+
+  // 4. Commercial info
+  priceRange?: string;
+  paymentConditions?: string;
+  launchDate?: string;
+  realtorContact?: string;
+
+  // 5. Extras
+  voiceoverText?: string;
+  musicPreference?: string;
+  legalDisclaimers?: string;
+
+  // References & meta
+  referencesUrls?: string[];
   howFoundUs?: string;
   additionalNotes?: string;
 }
@@ -46,4 +75,17 @@ export interface BriefingSubmitResponse {
   success: boolean;
   qualificationId: string;
   message: string;
+}
+
+/**
+ * Configuration returned when loading a briefing form.
+ */
+export interface BriefingFormConfig {
+  leadId: string;
+  tenantId: string;
+  leadName: string | null;
+  email: string | null;
+  phone: string | null;
+  status: string;
+  alreadySubmitted: boolean;
 }

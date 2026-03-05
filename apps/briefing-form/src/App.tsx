@@ -1,23 +1,16 @@
-/**
- * Briefing Form App — Main component.
- *
- * Renders a multi-step briefing form for leads.
- * Route format: /briefing/:leadId
- *
- * TODO: Implement routing and form logic
- */
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BriefingPage } from '@/pages/BriefingPage';
+import { SuccessPage } from '@/pages/SuccessPage';
+import { NotFoundPage } from '@/pages/NotFoundPage';
 
 export function App() {
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b bg-card p-4">
-        <h1 className="text-xl font-bold text-primary">KorIA Briefing</h1>
-      </header>
-      <main className="container mx-auto max-w-2xl p-6">
-        <p className="text-muted-foreground">
-          Briefing form — placeholder. Multi-step form will be implemented here.
-        </p>
-      </main>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/briefing/:leadId" element={<BriefingPage />} />
+        <Route path="/briefing/success" element={<SuccessPage />} />
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
