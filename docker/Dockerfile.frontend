@@ -10,14 +10,18 @@ RUN corepack enable && corepack prepare pnpm@9 --activate
 WORKDIR /app
 
 ARG APP_NAME
+ARG VITE_API_URL=/api/v1
 
 # Copy workspace config
-COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
+COPY pnpm-workspace.yaml pnpm-lock.yaml package.json tsconfig.base.json ./
 COPY packages/ ./packages/
 COPY apps/${APP_NAME}/ ./apps/${APP_NAME}/
 
 # Install dependencies
 RUN pnpm install --frozen-lockfile
+
+# Inject VITE_API_URL at build time
+ENV VITE_API_URL=${VITE_API_URL}
 
 # Build the frontend app
 RUN pnpm --filter @koria/${APP_NAME} build

@@ -30,6 +30,9 @@ services:
       - CLICKUP_REFRESH_TOKEN=${CLICKUP_REFRESH_TOKEN}
       - N8N_WEBHOOK_URL=${N8N_WEBHOOK_URL}
       - DEFAULT_TENANT_ID=${DEFAULT_TENANT_ID:-a9081890-d60f-4d91-ab05-c1407302a4c9}
+      - UPLOAD_PORTAL_URL=${UPLOAD_PORTAL_URL:-https://upload.koriastudio.com}
+      - DASHBOARD_URL=${DASHBOARD_URL:-https://dashboard.koriastudio.com}
+      - BRIEFING_FORM_URL=${BRIEFING_FORM_URL:-https://briefing.koriastudio.com}
       - TZ=${TZ:-America/Sao_Paulo}
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:3000/api/v1/health || exit 1"]
@@ -44,6 +47,7 @@ services:
       dockerfile: docker/Dockerfile.frontend
       args:
         APP_NAME: upload-portal
+        VITE_API_URL: ${VITE_API_URL:-https://api.koriastudio.com/api/v1}
     container_name: koria_upload_portal
     restart: unless-stopped
     networks:
@@ -57,6 +61,7 @@ services:
       dockerfile: docker/Dockerfile.frontend
       args:
         APP_NAME: dashboard
+        VITE_API_URL: ${VITE_API_URL:-https://api.koriastudio.com/api/v1}
     container_name: koria_dashboard
     restart: unless-stopped
     networks:
@@ -70,6 +75,7 @@ services:
       dockerfile: docker/Dockerfile.frontend
       args:
         APP_NAME: briefing-form
+        VITE_API_URL: ${VITE_API_URL:-https://api.koriastudio.com/api/v1}
     container_name: koria_briefing_form
     restart: unless-stopped
     networks:

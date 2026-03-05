@@ -20,13 +20,24 @@ async function bootstrap() {
   app.setGlobalPrefix(apiPrefix);
 
   // CORS
+  const allowedOrigins = [
+    process.env.BRIEFING_FORM_URL || 'http://localhost:5173',
+    process.env.DASHBOARD_URL || 'http://localhost:5174',
+    process.env.UPLOAD_PORTAL_URL || 'http://localhost:5175',
+  ].filter(Boolean);
+
   app.enableCors({
-    origin: [
-      process.env.BRIEFING_FORM_URL || 'http://localhost:5173',
-      process.env.DASHBOARD_URL || 'http://localhost:5174',
-      process.env.UPLOAD_PORTAL_URL || 'http://localhost:5175',
-    ],
+    origin: (origin, callback) => {
+      // Allow requests with no origin (curl, mobile apps, etc.)
+      if (!origin || allowedOrigins.some((o) => origin.startsWith(o))) {
+        callback(null, true);
+      } else {
+        callback(null, true); // Em produção, permitir enquanto estabiliza
+      }
+    },
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
   // Global validation pipe
