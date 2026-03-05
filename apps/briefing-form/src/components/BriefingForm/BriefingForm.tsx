@@ -1,5 +1,7 @@
+import { useEffect } from 'react';
 import { FormProvider } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Send, Loader2 } from 'lucide-react';
 import { useBriefingForm } from '@/hooks/use-briefing-form';
 import { StepIndicator } from '@/components/StepIndicator';
@@ -18,6 +20,7 @@ interface BriefingFormProps {
 
 export function BriefingForm({ token }: BriefingFormProps) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const {
     form,
     currentStep,
@@ -27,7 +30,14 @@ export function BriefingForm({ token }: BriefingFormProps) {
     goToStep,
     onSubmit,
     isSubmitting,
+    isLoadingConfig,
+    configError,
+    submitSuccess,
   } = useBriefingForm(token);
+
+  useEffect(() => {
+    if (submitSuccess) navigate('/briefing/success', { replace: true });
+  }, [submitSuccess, navigate]);
 
   const stepLabels = [
     t('briefing.steps.property'),
@@ -37,6 +47,26 @@ export function BriefingForm({ token }: BriefingFormProps) {
     t('briefing.steps.extras'),
     t('briefing.steps.review'),
   ];
+
+  if (isLoadingConfig) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (configError) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <div className="text-center space-y-2">
+          <p className="text-lg font-semibold text-destructive">
+            {t(`briefing.errors.${configError}`)}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const isLastStep = currentStep === totalSteps - 1;
 
