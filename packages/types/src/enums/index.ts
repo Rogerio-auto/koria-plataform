@@ -78,6 +78,18 @@ export enum TemplateCategory {
   Auth = 'auth',
 }
 
+export enum UserRole {
+  Admin = 'admin',
+  Manager = 'manager',
+  Sdr = 'sdr',
+  Viewer = 'viewer',
+}
+
+export enum UserStatus {
+  Active = 'active',
+  Inactive = 'inactive',
+}
+
 export enum EventEntityType {
   Lead = 'lead',
   Conversation = 'conversation',

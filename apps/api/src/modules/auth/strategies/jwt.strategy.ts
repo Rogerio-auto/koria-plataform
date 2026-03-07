@@ -1,14 +1,34 @@
 /**
- * JWT Passport strategy.
- * TODO: Implement with @nestjs/passport PassportStrategy
- *
- * - Extracts JWT from Authorization header
- * - Validates token and returns user payload
- * - Used by JwtAuthGuard
+ * JWT Passport strategy — validates Bearer tokens.
  */
+import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { PassportStrategy } from '@nestjs/passport';
+import { ExtractJwt, Strategy } from 'passport-jwt';
 
-// import { Injectable } from '@nestjs/common';
-// import { PassportStrategy } from '@nestjs/passport';
-// import { ExtractJwt, Strategy } from 'passport-jwt';
+interface JwtPayload {
+  sub: string;
+  email: string;
+  role: string;
+  tenantId: string;
+}
 
-export {}; // placeholder
+@Injectable()
+export class JwtStrategy extends PassportStrategy(Strategy) {
+  constructor(config: ConfigService) {
+    super({
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      ignoreExpiration: false,
+      secretOrKey: config.get<string>('JWT_SECRET'),
+    });
+  }
+
+  validate(payload: JwtPayload) {
+    return {
+      id: payload.sub,
+      email: payload.email,
+      role: payload.role,
+      tenantId: payload.tenantId,
+    };
+  }
+}

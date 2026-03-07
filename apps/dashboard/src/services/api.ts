@@ -1,38 +1,114 @@
 /**
  * API client for the dashboard.
- * TODO: Implement with fetch/axios, JWT token interceptor.
  */
+import { useAuthStore } from '@/stores/auth.store';
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api/v1';
 
-async function authFetch(endpoint: string, options?: RequestInit) {
-  // TODO: Add JWT token from auth store
+async function authFetch<T = unknown>(endpoint: string, options?: RequestInit): Promise<T> {
+  const token = useAuthStore.getState().token;
   const res = await fetch(`${API_BASE}${endpoint}`, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
-      // Authorization: `Bearer ${token}`,
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...options?.headers,
     },
   });
-  if (!res.ok) throw new Error(`API error: ${res.status}`);
+
+  if (res.status === 401) {
+    useAuthStore.getState().logout();
+    window.location.href = '/login';
+    throw new Error('Unauthorized');
+  }
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.message || `API error: ${res.status}`);
+  }
+
   return res.json();
 }
 
 export const dashboardApi = {
   // Auth
-  login: (_email: string, _password: string) => authFetch('/auth/login', { method: 'POST' }),
+  login: (email: string, password: string) =>
+    authFetch<{ access_token: string; user: { id: string; email: string; fullName: string; role: string; tenantId: string } }>(
+      '/auth/login',
+      { method: 'POST', body: JSON.stringify({ email, password }) },
+    ),
   me: () => authFetch('/auth/me'),
+  refresh: () => authFetch<{ access_token: string }>('/auth/refresh', { method: 'POST' }),
+  validateInvite: (token: string) => authFetch(`/auth/invite/validate/${encodeURIComponent(token)}`),
+  register: (data: { token: string; fullName: string; email?: string; password: string }) =>
+    authFetch('/auth/register', { method: 'POST', body: JSON.stringify(data) }),
+  changePassword: (currentPassword: string, newPassword: string) =>
+    authFetch('/auth/change-password', { method: 'POST', body: JSON.stringify({ currentPassword, newPassword }) }),
+
+  // Invites (admin/manager)
+  createInvite: (data: { email?: string; role: string; expiresInHours?: number }) =>
+    authFetch('/auth/invites', { method: 'POST', body: JSON.stringify(data) }),
+  getInvites: () => authFetch('/auth/invites'),
+
+  // Users (admin)
+  getUsers: () => authFetch('/auth/users'),
 
   // Leads
   getLeads: (_params?: unknown) => authFetch('/leads'),
   getLead: (id: string) => authFetch(`/leads/${id}`),
 
   // Analytics
-  getOverview: () => authFetch('/analytics/overview'),
+  getOverview: (startDate?: string, endDate?: string) => {
+    const qs = new URLSearchParams();
+    if (startDate) qs.set('startDate', startDate);
+    if (endDate) qs.set('endDate', endDate);
+    return authFetch(`/analytics/overview?${qs}`);
+  },
   getFunnel: () => authFetch('/analytics/funnel'),
-  getRevenue: (_params?: unknown) => authFetch('/analytics/revenue'),
-  getAiCosts: (_params?: unknown) => authFetch('/analytics/ai-costs'),
+  getLeadsByPeriod: (startDate?: string, endDate?: string) => {
+    const qs = new URLSearchParams();
+    if (startDate) qs.set('startDate', startDate);
+    if (endDate) qs.set('endDate', endDate);
+    return authFetch(`/analytics/leads-by-period?${qs}`);
+  },
+  getRevenue: (startDate?: string, endDate?: string) => {
+    const qs = new URLSearchParams();
+    if (startDate) qs.set('startDate', startDate);
+    if (endDate) qs.set('endDate', endDate);
+    return authFetch(`/analytics/revenue?${qs}`);
+  },
+  getAiCosts: (startDate?: string, endDate?: string) => {
+    const qs = new URLSearchParams();
+    if (startDate) qs.set('startDate', startDate);
+    if (endDate) qs.set('endDate', endDate);
+    return authFetch(`/analytics/ai-costs?${qs}`);
+  },
+  getFollowupRate: () => authFetch('/analytics/followup-rate'),
+
+  // Objections
+  getObjectionsOverview: (startDate?: string, endDate?: string) => {
+    const qs = new URLSearchParams();
+    if (startDate) qs.set('startDate', startDate);
+    if (endDate) qs.set('endDate', endDate);
+    return authFetch(`/objections/overview?${qs}`);
+  },
+  getObjectionsByPeriod: (startDate?: string, endDate?: string) => {
+    const qs = new URLSearchParams();
+    if (startDate) qs.set('startDate', startDate);
+    if (endDate) qs.set('endDate', endDate);
+    return authFetch(`/objections/by-period?${qs}`);
+  },
+  getObjectionCategories: () => authFetch('/objections/categories'),
+  getObjectionDrilldown: (category: string) => authFetch(`/objections/drilldown/${encodeURIComponent(category)}`),
+
+  // Assistant
+  chatAssistant: (message: string, conversationId?: string) =>
+    authFetch<{ conversationId: string; reply: string; actions?: Array<{ type: string; description: string; success: boolean }> }>(
+      '/assistant/chat',
+      { method: 'POST', body: JSON.stringify({ message, conversationId }) },
+    ),
+  getConversations: () => authFetch('/assistant/conversations'),
+  getConversation: (id: string) => authFetch(`/assistant/conversations/${id}`),
 
   // Work Orders
   getWorkOrders: (_params?: unknown) => authFetch('/work-orders'),

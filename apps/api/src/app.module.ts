@@ -16,6 +16,8 @@ import { WorkOrdersModule } from './modules/work-orders/work-orders.module';
 import { PaymentsModule } from './modules/payments/payments.module';
 import { ClickupModule } from './modules/clickup/clickup.module';
 import { WebhookModule } from './modules/webhook/webhook.module';
+import { ObjectionsModule } from './modules/objections/objections.module';
+import { AssistantModule } from './modules/assistant/assistant.module';
 
 @Module({
   imports: [
@@ -38,6 +40,8 @@ import { WebhookModule } from './modules/webhook/webhook.module';
     ProductsModule,
     WorkOrdersModule,
     PaymentsModule,
+    ObjectionsModule,
+    AssistantModule,
 
     // Integration modules
     ClickupModule,
