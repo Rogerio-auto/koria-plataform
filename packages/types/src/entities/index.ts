@@ -9,3 +9,4 @@ export * from './work-order';
 export * from './analytics-user';
 export * from './objection';
 export * from './assistant';
+export * from './pipeline';

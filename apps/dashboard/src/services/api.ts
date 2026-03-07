@@ -54,8 +54,31 @@ export const dashboardApi = {
   getUsers: () => authFetch('/auth/users'),
 
   // Leads
-  getLeads: (_params?: unknown) => authFetch('/leads'),
+  getLeads: (params?: { page?: number; limit?: number; search?: string; status?: string; pipelineId?: string; stageId?: string; sortBy?: string; sortOrder?: string }) => {
+    const qs = new URLSearchParams();
+    if (params?.page) qs.set('page', String(params.page));
+    if (params?.limit) qs.set('limit', String(params.limit));
+    if (params?.search) qs.set('search', params.search);
+    if (params?.status) qs.set('status', params.status);
+    if (params?.pipelineId) qs.set('pipelineId', params.pipelineId);
+    if (params?.stageId) qs.set('stageId', params.stageId);
+    if (params?.sortBy) qs.set('sortBy', params.sortBy);
+    if (params?.sortOrder) qs.set('sortOrder', params.sortOrder);
+    return authFetch(`/leads?${qs}`);
+  },
   getLead: (id: string) => authFetch(`/leads/${id}`),
+  createLead: (data: { type?: string; displayName?: string; preferredLanguage?: string; countryCode?: string; contactPoints?: Array<{ channel: string; handle: string; isPrimary?: boolean }> }) =>
+    authFetch('/leads', { method: 'POST', body: JSON.stringify(data) }),
+  updateLead: (id: string, data: { type?: string; displayName?: string; status?: string; score?: number; vipLevel?: number }) =>
+    authFetch(`/leads/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  deleteLead: (id: string) =>
+    authFetch(`/leads/${id}`, { method: 'DELETE' }),
+  moveLeadStage: (id: string, data: { pipelineId: string; stageId: string }) =>
+    authFetch(`/leads/${id}/stage`, { method: 'POST', body: JSON.stringify(data) }),
+  addLeadContact: (id: string, data: { channel: string; handle: string; isPrimary?: boolean }) =>
+    authFetch(`/leads/${id}/contacts`, { method: 'POST', body: JSON.stringify(data) }),
+  removeLeadContact: (leadId: string, contactId: string) =>
+    authFetch(`/leads/${leadId}/contacts/${contactId}`, { method: 'DELETE' }),
 
   // Analytics
   getOverview: (startDate?: string, endDate?: string) => {
@@ -119,5 +142,40 @@ export const dashboardApi = {
   getPayment: (id: string) => authFetch(`/payments/${id}`),
 
   // Products
-  getProducts: () => authFetch('/products'),
+  getProducts: (search?: string) => {
+    const qs = new URLSearchParams();
+    if (search) qs.set('search', search);
+    return authFetch(`/products?${qs}`);
+  },
+  getProduct: (id: string) => authFetch(`/products/${id}`),
+  createProduct: (data: { name: string; category?: string; defaultCurrency?: string; prices?: Array<{ currency: string; priceAmount: string; isDefault?: boolean }> }) =>
+    authFetch('/products', { method: 'POST', body: JSON.stringify(data) }),
+  updateProduct: (id: string, data: { name?: string; category?: string; defaultCurrency?: string }) =>
+    authFetch(`/products/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  deleteProduct: (id: string) =>
+    authFetch(`/products/${id}`, { method: 'DELETE' }),
+  addProductPrice: (productId: string, data: { currency: string; priceAmount: string; isDefault?: boolean }) =>
+    authFetch(`/products/${productId}/prices`, { method: 'POST', body: JSON.stringify(data) }),
+  updateProductPrice: (productId: string, priceId: string, data: { currency?: string; priceAmount?: string; isDefault?: boolean }) =>
+    authFetch(`/products/${productId}/prices/${priceId}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  deleteProductPrice: (productId: string, priceId: string) =>
+    authFetch(`/products/${productId}/prices/${priceId}`, { method: 'DELETE' }),
+
+  // Pipelines & Stages
+  getPipelines: () => authFetch('/pipelines'),
+  getPipeline: (id: string) => authFetch(`/pipelines/${id}`),
+  createPipeline: (data: { name: string }) =>
+    authFetch('/pipelines', { method: 'POST', body: JSON.stringify(data) }),
+  updatePipeline: (id: string, data: { name?: string }) =>
+    authFetch(`/pipelines/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  deletePipeline: (id: string) =>
+    authFetch(`/pipelines/${id}`, { method: 'DELETE' }),
+  createStage: (pipelineId: string, data: { name: string; code: string; position?: number; isTerminal?: boolean }) =>
+    authFetch(`/pipelines/${pipelineId}/stages`, { method: 'POST', body: JSON.stringify(data) }),
+  updateStage: (stageId: string, data: { name?: string; code?: string; position?: number; isTerminal?: boolean }) =>
+    authFetch(`/pipelines/stages/${stageId}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  deleteStage: (stageId: string) =>
+    authFetch(`/pipelines/stages/${stageId}`, { method: 'DELETE' }),
+  reorderStages: (pipelineId: string, stages: Array<{ id: string; position: number }>) =>
+    authFetch(`/pipelines/${pipelineId}/stages/reorder`, { method: 'POST', body: JSON.stringify({ stages }) }),
 };

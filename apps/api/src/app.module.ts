@@ -18,6 +18,7 @@ import { ClickupModule } from './modules/clickup/clickup.module';
 import { WebhookModule } from './modules/webhook/webhook.module';
 import { ObjectionsModule } from './modules/objections/objections.module';
 import { AssistantModule } from './modules/assistant/assistant.module';
+import { PipelinesModule } from './modules/pipelines/pipelines.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { AssistantModule } from './modules/assistant/assistant.module';
     PaymentsModule,
     ObjectionsModule,
     AssistantModule,
+    PipelinesModule,
 
     // Integration modules
     ClickupModule,

@@ -10,11 +10,17 @@ import {
   MessageSquare,
   Menu,
   ChevronLeft,
+  UserCheck,
+  Package,
+  GitBranch,
 } from 'lucide-react';
 import { useState } from 'react';
 
 const navItems = [
   { to: '/', label: 'Visão Geral', icon: LayoutDashboard },
+  { to: '/leads', label: 'Leads', icon: UserCheck },
+  { to: '/products', label: 'Produtos', icon: Package },
+  { to: '/pipelines', label: 'Pipelines', icon: GitBranch },
   { to: '/objections', label: 'Objeções', icon: ShieldAlert },
   { to: '/settings/users', label: 'Usuários', icon: Users, roles: ['admin', 'manager'] },
   { to: '/settings', label: 'Configurações', icon: Settings },

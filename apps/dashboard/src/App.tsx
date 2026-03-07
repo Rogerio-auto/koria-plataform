@@ -13,6 +13,7 @@ import { LeadDetailPage } from '@/pages/LeadDetailPage';
 import { WorkOrdersPage } from '@/pages/WorkOrdersPage';
 import { PaymentsPage } from '@/pages/PaymentsPage';
 import { ProductsPage } from '@/pages/ProductsPage';
+import { PipelinesPage } from '@/pages/PipelinesPage';
 
 export function App() {
   return (
@@ -32,6 +33,7 @@ export function App() {
           <Route path="work-orders" element={<WorkOrdersPage />} />
           <Route path="payments" element={<PaymentsPage />} />
           <Route path="products" element={<ProductsPage />} />
+          <Route path="pipelines" element={<PipelinesPage />} />
           <Route path="settings" element={<SettingsPage />} />
 
           {/* Admin/Manager only */}
