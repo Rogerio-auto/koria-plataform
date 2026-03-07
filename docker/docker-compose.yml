@@ -19,7 +19,7 @@ services:
       - NODE_ENV=production
       - API_PORT=3000
       - API_PREFIX=/api/v1
-      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${DB_KORIA:-core_db}
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${DB_KORIA:-core_sdr}
       - REDIS_URL=redis://redis:6379/4
       - JWT_SECRET=${JWT_SECRET}
       - JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-7d}
