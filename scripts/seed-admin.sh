@@ -31,7 +31,7 @@ elif command -v python3 &>/dev/null; then
   HASH=$(python3 -c "
 import hashlib, os
 salt = os.urandom(16).hex()
-key = hashlib.scrypt(b'$PASSWORD', salt=bytes.fromhex(salt), n=16384, r=8, p=1, dklen=64).hex()
+key = hashlib.scrypt(b'$PASSWORD', salt=salt.encode('utf-8'), n=16384, r=8, p=1, dklen=64).hex()
 print(salt + ':' + key)
 ")
 else
