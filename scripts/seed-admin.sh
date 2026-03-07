@@ -16,8 +16,10 @@ echo "🔐 KorIA — Seed Admin User"
 echo "==========================="
 echo "Email:    $EMAIL"
 
-# Generate password hash using Node.js (same algorithm as auth.service.ts)
-HASH=$(node -e "
+# Generate password hash (same algorithm as auth.service.ts: scrypt salt:key)
+# Try node first, fallback to python3
+if command -v node &>/dev/null; then
+  HASH=$(node -e "
 const crypto = require('crypto');
 const salt = crypto.randomBytes(16).toString('hex');
 crypto.scrypt('$PASSWORD', salt, 64, (err, key) => {
@@ -25,6 +27,17 @@ crypto.scrypt('$PASSWORD', salt, 64, (err, key) => {
   console.log(salt + ':' + key.toString('hex'));
 });
 ")
+elif command -v python3 &>/dev/null; then
+  HASH=$(python3 -c "
+import hashlib, os
+salt = os.urandom(16).hex()
+key = hashlib.scrypt(b'$PASSWORD', salt=bytes.fromhex(salt), n=16384, r=8, p=1, dklen=64).hex()
+print(salt + ':' + key)
+")
+else
+  echo '❌ Requires node or python3 to generate password hash'
+  exit 1
+fi
 
 if [ -z "$HASH" ]; then
   echo "❌ Failed to generate password hash"
