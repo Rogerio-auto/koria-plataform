@@ -8,14 +8,10 @@ export function OverviewPage() {
   const { overview, funnel, leadsByPeriod, revenue } = useAnalytics();
 
   const data = overview.data as {
-    totalLeads?: number;
-    totalLeadsVariation?: number;
-    totalRevenue?: number;
-    totalRevenueVariation?: number;
-    conversionRate?: number;
-    conversionRateVariation?: number;
-    totalErrors?: number;
-    totalErrorsVariation?: number;
+    totalLeads?: { value: number; variation: number };
+    qualifiedLeads?: { value: number; variation: number };
+    closedDeals?: { value: number; variation: number };
+    revenue?: { value: number; variation: number };
   } | undefined;
 
   return (
@@ -26,8 +22,8 @@ export function OverviewPage() {
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
           label="Total de Leads"
-          value={overview.isLoading ? '...' : (data?.totalLeads ?? 0)}
-          trend={data?.totalLeadsVariation}
+          value={overview.isLoading ? '...' : (data?.totalLeads?.value ?? 0)}
+          trend={data?.totalLeads?.variation}
           icon={<Users size={18} className="text-muted-foreground" />}
         />
         <StatCard
@@ -35,21 +31,21 @@ export function OverviewPage() {
           value={
             overview.isLoading
               ? '...'
-              : `R$ ${(data?.totalRevenue ?? 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
+              : `R$ ${(data?.revenue?.value ?? 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
           }
-          trend={data?.totalRevenueVariation}
+          trend={data?.revenue?.variation}
           icon={<DollarSign size={18} className="text-muted-foreground" />}
         />
         <StatCard
-          label="Taxa de Conversão"
-          value={overview.isLoading ? '...' : `${(data?.conversionRate ?? 0).toFixed(1)}%`}
-          trend={data?.conversionRateVariation}
+          label="Leads Qualificados"
+          value={overview.isLoading ? '...' : (data?.qualifiedLeads?.value ?? 0)}
+          trend={data?.qualifiedLeads?.variation}
           icon={<TrendingUp size={18} className="text-muted-foreground" />}
         />
         <StatCard
-          label="Erros"
-          value={overview.isLoading ? '...' : (data?.totalErrors ?? 0)}
-          trend={data?.totalErrorsVariation}
+          label="Negócios Fechados"
+          value={overview.isLoading ? '...' : (data?.closedDeals?.value ?? 0)}
+          trend={data?.closedDeals?.variation}
           icon={<AlertTriangle size={18} className="text-muted-foreground" />}
         />
       </div>

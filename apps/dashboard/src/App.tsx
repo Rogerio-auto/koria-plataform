@@ -19,7 +19,7 @@ export function App() {
     <Routes>
       {/* Public */}
       <Route path="/login" element={<LoginPage />} />
-      <Route path="/invite" element={<InvitePage />} />
+      <Route path="/invite/:token" element={<InvitePage />} />
 
       {/* Protected */}
       <Route element={<ProtectedRoute />}>

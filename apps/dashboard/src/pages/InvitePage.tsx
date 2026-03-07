@@ -1,14 +1,14 @@
 import { useState, useEffect, type FormEvent } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useAuthStore, type AuthUser } from '@/stores/auth.store';
 import { dashboardApi } from '@/services/api';
 
 export function InvitePage() {
-  const [searchParams] = useSearchParams();
+  const { token: urlToken } = useParams<{ token: string }>();
   const navigate = useNavigate();
   const setAuth = useAuthStore((s) => s.setAuth);
 
-  const token = searchParams.get('token') || '';
+  const token = urlToken || '';
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
