@@ -1,5 +1,5 @@
-import { Injectable, Inject, NotFoundException } from '@nestjs/common';
-import { eq, and, ilike } from 'drizzle-orm';
+import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
+import { eq, and, ilike, inArray } from 'drizzle-orm';
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import { DATABASE_CONNECTION } from '../database/database.module';
 import { products, productPrices } from '@koria/database';
@@ -23,16 +23,15 @@ export class ProductsService {
       .where(and(...conditions))
       .orderBy(products.name);
 
-    // Get all prices at once, then group by productId
+    // Get prices only for this tenant's products
     const productIds = rows.map((r) => r.id);
     const allPrices =
       productIds.length > 0
-        ? await this.db.select().from(productPrices)
+        ? await this.db.select().from(productPrices).where(inArray(productPrices.productId, productIds))
         : [];
 
     const priceMap = new Map<string, typeof allPrices>();
     for (const p of allPrices) {
-      if (!productIds.includes(p.productId)) continue;
       const arr = priceMap.get(p.productId) || [];
       arr.push(p);
       priceMap.set(p.productId, arr);
@@ -165,25 +164,30 @@ export class ProductsService {
 
     if (!product) throw new NotFoundException('Produto não encontrado');
 
-    // If setting as default, unset others
-    if (data.isDefault) {
-      await this.db
-        .update(productPrices)
-        .set({ isDefault: false })
-        .where(eq(productPrices.productId, productId));
+    try {
+      // If setting as default, unset others
+      if (data.isDefault) {
+        await this.db
+          .update(productPrices)
+          .set({ isDefault: false })
+          .where(eq(productPrices.productId, productId));
+      }
+
+      const [price] = await this.db
+        .insert(productPrices)
+        .values({
+          productId,
+          currency: data.currency,
+          priceAmount: String(data.priceAmount),
+          isDefault: data.isDefault ?? false,
+        })
+        .returning();
+
+      return { ...price!, priceAmount: Number(price!.priceAmount) };
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Erro ao adicionar preço';
+      throw new BadRequestException(message);
     }
-
-    const [price] = await this.db
-      .insert(productPrices)
-      .values({
-        productId,
-        currency: data.currency,
-        priceAmount: data.priceAmount,
-        isDefault: data.isDefault ?? false,
-      })
-      .returning();
-
-    return { ...price!, priceAmount: Number(price!.priceAmount) };
   }
 
   async updatePrice(
@@ -208,30 +212,35 @@ export class ProductsService {
 
     if (!existing) throw new NotFoundException('Preço não encontrado');
 
-    if (data.isDefault) {
+    try {
+      if (data.isDefault) {
+        await this.db
+          .update(productPrices)
+          .set({ isDefault: false })
+          .where(eq(productPrices.productId, productId));
+      }
+
+      const updates: Record<string, unknown> = {};
+      if (data.currency !== undefined) updates.currency = data.currency;
+      if (data.priceAmount !== undefined) updates.priceAmount = String(data.priceAmount);
+      if (data.isDefault !== undefined) updates.isDefault = data.isDefault;
+      updates.updatedAt = new Date();
+
       await this.db
         .update(productPrices)
-        .set({ isDefault: false })
-        .where(eq(productPrices.productId, productId));
+        .set(updates)
+        .where(eq(productPrices.id, priceId));
+
+      const [updated] = await this.db
+        .select()
+        .from(productPrices)
+        .where(eq(productPrices.id, priceId));
+
+      return { ...updated!, priceAmount: Number(updated!.priceAmount) };
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Erro ao atualizar preço';
+      throw new BadRequestException(message);
     }
-
-    const updates: Record<string, unknown> = {};
-    if (data.currency !== undefined) updates.currency = data.currency;
-    if (data.priceAmount !== undefined) updates.priceAmount = data.priceAmount;
-    if (data.isDefault !== undefined) updates.isDefault = data.isDefault;
-    updates.updatedAt = new Date();
-
-    await this.db
-      .update(productPrices)
-      .set(updates)
-      .where(eq(productPrices.id, priceId));
-
-    const [updated] = await this.db
-      .select()
-      .from(productPrices)
-      .where(eq(productPrices.id, priceId));
-
-    return { ...updated!, priceAmount: Number(updated!.priceAmount) };
   }
 
   async removePrice(tenantId: string, productId: string, priceId: string) {

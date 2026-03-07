@@ -63,6 +63,7 @@ export function LeadsPage() {
   const deleteMut = useMutation({
     mutationFn: (id: string) => dashboardApi.deleteLead(id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['leads'] }),
+    onError: () => alert('Erro ao excluir lead'),
   });
 
   const leads = data?.data || [];

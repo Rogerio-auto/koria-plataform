@@ -1,5 +1,5 @@
-import { Injectable, Inject, NotFoundException } from '@nestjs/common';
-import { eq, and, asc } from 'drizzle-orm';
+import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
+import { eq, and, asc, inArray } from 'drizzle-orm';
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import { DATABASE_CONNECTION } from '../database/database.module';
 import { pipelines, stages } from '@koria/database';
@@ -24,12 +24,12 @@ export class PipelinesService {
         ? await this.db
             .select()
             .from(stages)
+            .where(inArray(stages.pipelineId, pipelineIds))
             .orderBy(asc(stages.position))
         : [];
 
     const stageMap = new Map<string, typeof stageRows>();
     for (const s of stageRows) {
-      if (!pipelineIds.includes(s.pipelineId)) continue;
       const arr = stageMap.get(s.pipelineId) || [];
       arr.push(s);
       stageMap.set(s.pipelineId, arr);
@@ -115,18 +115,23 @@ export class PipelinesService {
 
     if (!pipeline) throw new NotFoundException('Pipeline não encontrado');
 
-    const [stage] = await this.db
-      .insert(stages)
-      .values({
-        pipelineId: data.pipelineId,
-        name: data.name,
-        code: data.code,
-        position: data.position ?? 0,
-        isTerminal: data.isTerminal ?? false,
-      })
-      .returning();
+    try {
+      const [stage] = await this.db
+        .insert(stages)
+        .values({
+          pipelineId: data.pipelineId,
+          name: data.name,
+          code: data.code,
+          position: data.position ?? 0,
+          isTerminal: data.isTerminal ?? false,
+        })
+        .returning();
 
-    return stage;
+      return stage;
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Erro ao criar etapa';
+      throw new BadRequestException(message);
+    }
   }
 
   async updateStage(

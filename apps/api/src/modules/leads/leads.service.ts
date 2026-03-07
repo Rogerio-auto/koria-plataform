@@ -1,5 +1,5 @@
-import { Injectable, Inject, NotFoundException } from '@nestjs/common';
-import { eq, and, ilike, count, desc, asc } from 'drizzle-orm';
+import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
+import { eq, and, ilike, count, desc, asc, inArray } from 'drizzle-orm';
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import { DATABASE_CONNECTION } from '../database/database.module';
 import {
@@ -68,12 +68,11 @@ export class LeadsService {
     const leadIds = rows.map((r) => r.id);
     const contacts =
       leadIds.length > 0
-        ? await this.db.select().from(contactPoints)
+        ? await this.db.select().from(contactPoints).where(inArray(contactPoints.leadId, leadIds))
         : [];
 
     const contactMap = new Map<string, typeof contacts>();
     for (const c of contacts) {
-      if (!leadIds.includes(c.leadId)) continue;
       const arr = contactMap.get(c.leadId) || [];
       arr.push(c);
       contactMap.set(c.leadId, arr);
@@ -94,6 +93,7 @@ export class LeadsService {
             .from(leadStage)
             .innerJoin(stages, eq(leadStage.stageId, stages.id))
             .innerJoin(pipelines, eq(leadStage.pipelineId, pipelines.id))
+            .where(inArray(leadStage.leadId, leadIds))
         : [];
 
     // Filter by pipeline/stage if requested
@@ -106,7 +106,6 @@ export class LeadsService {
 
     const stageMap = new Map<string, typeof stageRows>();
     for (const s of stageRows) {
-      if (!leadIds.includes(s.leadId)) continue;
       const arr = stageMap.get(s.leadId) || [];
       arr.push(s);
       stageMap.set(s.leadId, arr);
@@ -191,33 +190,38 @@ export class LeadsService {
       contactPoints?: Array<{ channel: string; handle: string; isPrimary?: boolean; metadata?: Record<string, unknown> }>;
     },
   ) {
-    const [lead] = await this.db
-      .insert(leads)
-      .values({
-        tenantId,
-        type: (data.type as 'person' | 'company') || 'person',
-        displayName: data.displayName || null,
-        preferredLanguage: data.preferredLanguage || null,
-        countryCode: data.countryCode || null,
-        vipLevel: data.vipLevel ?? 0,
-        score: data.score ?? 0,
-      })
-      .returning();
-
-    if (data.contactPoints && data.contactPoints.length > 0) {
-      await this.db.insert(contactPoints).values(
-        data.contactPoints.map((cp) => ({
+    try {
+      const [lead] = await this.db
+        .insert(leads)
+        .values({
           tenantId,
-          leadId: lead!.id,
-          channel: cp.channel as 'whatsapp' | 'instagram' | 'messenger' | 'email',
-          handle: cp.handle,
-          isPrimary: cp.isPrimary ?? false,
-          metadata: cp.metadata || {},
-        })),
-      );
-    }
+          type: (data.type as 'person' | 'company') || 'person',
+          displayName: data.displayName || null,
+          preferredLanguage: data.preferredLanguage || null,
+          countryCode: data.countryCode || null,
+          vipLevel: data.vipLevel ?? 0,
+          score: data.score ?? 0,
+        })
+        .returning();
 
-    return this.findOne(tenantId, lead!.id);
+      if (data.contactPoints && data.contactPoints.length > 0) {
+        await this.db.insert(contactPoints).values(
+          data.contactPoints.map((cp) => ({
+            tenantId,
+            leadId: lead!.id,
+            channel: cp.channel as 'whatsapp' | 'instagram' | 'messenger' | 'email',
+            handle: cp.handle,
+            isPrimary: cp.isPrimary ?? false,
+            metadata: cp.metadata || {},
+          })),
+        );
+      }
+
+      return this.findOne(tenantId, lead!.id);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Erro ao criar lead';
+      throw new BadRequestException(message);
+    }
   }
 
   async update(
@@ -282,28 +286,33 @@ export class LeadsService {
 
     if (!lead) throw new NotFoundException('Lead não encontrado');
 
-    // Upsert lead_stage (composite PK: leadId + pipelineId)
-    const [existing] = await this.db
-      .select()
-      .from(leadStage)
-      .where(and(eq(leadStage.leadId, leadId), eq(leadStage.pipelineId, pipelineId)))
-      .limit(1);
+    try {
+      // Upsert lead_stage (composite PK: leadId + pipelineId)
+      const [existing] = await this.db
+        .select()
+        .from(leadStage)
+        .where(and(eq(leadStage.leadId, leadId), eq(leadStage.pipelineId, pipelineId)))
+        .limit(1);
 
-    if (existing) {
-      await this.db
-        .update(leadStage)
-        .set({ stageId, updatedAt: new Date() })
-        .where(and(eq(leadStage.leadId, leadId), eq(leadStage.pipelineId, pipelineId)));
-    } else {
-      await this.db.insert(leadStage).values({
-        tenantId,
-        leadId,
-        pipelineId,
-        stageId,
-      });
+      if (existing) {
+        await this.db
+          .update(leadStage)
+          .set({ stageId, updatedAt: new Date() })
+          .where(and(eq(leadStage.leadId, leadId), eq(leadStage.pipelineId, pipelineId)));
+      } else {
+        await this.db.insert(leadStage).values({
+          tenantId,
+          leadId,
+          pipelineId,
+          stageId,
+        });
+      }
+
+      return this.findOne(tenantId, leadId);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Erro ao mover etapa';
+      throw new BadRequestException(message);
     }
-
-    return this.findOne(tenantId, leadId);
   }
 
   async addContactPoint(

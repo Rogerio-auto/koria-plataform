@@ -33,11 +33,13 @@ export function PipelinesPage() {
   const deletePipelineMut = useMutation({
     mutationFn: (id: string) => dashboardApi.deletePipeline(id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['pipelines'] }),
+    onError: () => alert('Erro ao excluir pipeline'),
   });
 
   const deleteStageMut = useMutation({
     mutationFn: (stageId: string) => dashboardApi.deleteStage(stageId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['pipelines'] }),
+    onError: () => alert('Erro ao excluir etapa'),
   });
 
   return (

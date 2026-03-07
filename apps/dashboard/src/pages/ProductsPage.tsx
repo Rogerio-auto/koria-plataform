@@ -40,6 +40,7 @@ export function ProductsPage() {
   const deleteMut = useMutation({
     mutationFn: (id: string) => dashboardApi.deleteProduct(id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['products'] }),
+    onError: () => alert('Erro ao excluir produto'),
   });
 
   return (
@@ -180,7 +181,7 @@ function ProductFormModal({ product, onClose }: { product: Product | null; onClo
         });
       } else {
         const prices = priceAmount
-          ? [{ currency, priceAmount, isDefault: true }]
+          ? [{ currency, priceAmount: String(priceAmount), isDefault: true }]
           : undefined;
         await dashboardApi.createProduct({
           name: name.trim(),
@@ -287,7 +288,7 @@ function PriceManagerModal({ product, onClose }: { product: Product; onClose: ()
     if (!amount) return;
     setSaving(true);
     try {
-      await dashboardApi.addProductPrice(product.id, { currency, priceAmount: amount, isDefault });
+      await dashboardApi.addProductPrice(product.id, { currency, priceAmount: String(amount), isDefault });
       queryClient.invalidateQueries({ queryKey: ['product', product.id] });
       queryClient.invalidateQueries({ queryKey: ['products'] });
       setAmount('');
@@ -301,9 +302,13 @@ function PriceManagerModal({ product, onClose }: { product: Product; onClose: ()
 
   async function deletePrice(priceId: string) {
     if (!confirm('Excluir este preço?')) return;
-    await dashboardApi.deleteProductPrice(product.id, priceId);
-    queryClient.invalidateQueries({ queryKey: ['product', product.id] });
-    queryClient.invalidateQueries({ queryKey: ['products'] });
+    try {
+      await dashboardApi.deleteProductPrice(product.id, priceId);
+      queryClient.invalidateQueries({ queryKey: ['product', product.id] });
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+    } catch {
+      alert('Erro ao excluir preço');
+    }
   }
 
   return (

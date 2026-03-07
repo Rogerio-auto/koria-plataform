@@ -69,16 +69,19 @@ export function LeadDetailPage() {
       queryClient.invalidateQueries({ queryKey: ['lead', id] });
       setEditing(false);
     },
+    onError: () => alert('Erro ao atualizar lead'),
   });
 
   const moveStageMut = useMutation({
     mutationFn: (data: { pipelineId: string; stageId: string }) => dashboardApi.moveLeadStage(id!, data),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['lead', id] }),
+    onError: () => alert('Erro ao mover etapa'),
   });
 
   const deleteContactMut = useMutation({
     mutationFn: (contactId: string) => dashboardApi.removeLeadContact(id!, contactId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['lead', id] }),
+    onError: () => alert('Erro ao remover contato'),
   });
 
   if (isLoading) {
