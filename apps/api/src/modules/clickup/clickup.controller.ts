@@ -73,7 +73,8 @@ export class ClickupController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'List ClickUp teams/workspaces' })
   async getTeams() {
-    return this.clickupService.getTeams();
+    const teams = await this.clickupService.getTeams();
+    return { teams };
   }
 
   @Get('teams/:teamId/spaces')
@@ -81,7 +82,8 @@ export class ClickupController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'List spaces in a ClickUp team' })
   async getSpaces(@Param('teamId') teamId: string) {
-    return this.clickupService.getSpaces(teamId);
+    const spaces = await this.clickupService.getSpaces(teamId);
+    return { spaces };
   }
 
   @Get('spaces/:spaceId/lists')
@@ -89,7 +91,8 @@ export class ClickupController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'List lists in a ClickUp space' })
   async getLists(@Param('spaceId') spaceId: string) {
-    return this.clickupService.getLists(spaceId);
+    const lists = await this.clickupService.getLists(spaceId);
+    return { lists };
   }
 
   // ──────────────────────────────────────────────
