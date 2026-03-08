@@ -178,4 +178,22 @@ export const dashboardApi = {
     authFetch(`/pipelines/stages/${stageId}`, { method: 'DELETE' }),
   reorderStages: (pipelineId: string, stages: Array<{ id: string; position: number }>) =>
     authFetch(`/pipelines/${pipelineId}/stages/reorder`, { method: 'POST', body: JSON.stringify({ stages }) }),
+
+  // ClickUp Integration
+  getClickupStatus: () => authFetch<{ connected: boolean }>('/clickup/status'),
+  getClickupTeams: () => authFetch<{ teams: Array<{ id: string; name: string }> }>('/clickup/teams'),
+  getClickupSpaces: (teamId: string) =>
+    authFetch<{ spaces: Array<{ id: string; name: string; statuses: Array<{ status: string; type: string; color: string }> }> }>(`/clickup/teams/${teamId}/spaces`),
+  getClickupLists: (spaceId: string) =>
+    authFetch<{ lists: Array<{ id: string; name: string; statuses: Array<{ status: string; type: string; color: string }> }> }>(`/clickup/spaces/${spaceId}/lists`),
+  getClickupSyncMappings: () => authFetch('/clickup/sync'),
+  getClickupSyncMapping: (pipelineId: string) => authFetch(`/clickup/sync/${pipelineId}`),
+  createClickupSync: (data: { pipelineId: string; clickupType: 'space' | 'list'; clickupEntityId: string; clickupTeamId: string }) =>
+    authFetch('/clickup/sync', { method: 'POST', body: JSON.stringify(data) }),
+  deleteClickupSync: (pipelineId: string) =>
+    authFetch(`/clickup/sync/${pipelineId}`, { method: 'DELETE' }),
+  clickupForcePush: (pipelineId: string) =>
+    authFetch(`/clickup/sync/${pipelineId}/push`, { method: 'POST' }),
+  clickupForcePull: (pipelineId: string) =>
+    authFetch(`/clickup/sync/${pipelineId}/pull`, { method: 'POST' }),
 };

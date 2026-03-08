@@ -28,5 +28,6 @@ export * from './analytics-users';
 export * from './invite-tokens';
 export * from './objections';
 export * from './objection-categories';
+export * from './clickup-sync';
 export * from './assistant-conversations';
 export * from './assistant-action-logs';

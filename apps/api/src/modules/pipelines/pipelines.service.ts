@@ -1,15 +1,27 @@
-import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { eq, and, asc, inArray } from 'drizzle-orm';
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import { DATABASE_CONNECTION } from '../database/database.module';
 import { pipelines, stages } from '@koria/database';
+import { ClickupService } from '../clickup/clickup.service';
 
 @Injectable()
 export class PipelinesService {
+  private readonly logger = new Logger(PipelinesService.name);
+
   constructor(
     @Inject(DATABASE_CONNECTION)
     private readonly db: PostgresJsDatabase,
+    private readonly clickupService: ClickupService,
   ) {}
+
+  private async trySyncToClickup(tenantId: string, pipelineId: string) {
+    try {
+      await this.clickupService.syncStagesToClickup(tenantId, pipelineId);
+    } catch (err) {
+      this.logger.warn(`ClickUp sync failed for pipeline ${pipelineId}: ${err}`);
+    }
+  }
 
   async findAllPipelines(tenantId: string) {
     const pipelineRows = await this.db
@@ -127,6 +139,7 @@ export class PipelinesService {
         })
         .returning();
 
+      this.trySyncToClickup(tenantId, data.pipelineId);
       return stage;
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Erro ao criar etapa';
@@ -167,6 +180,7 @@ export class PipelinesService {
     }
 
     const [updated] = await this.db.select().from(stages).where(eq(stages.id, stageId));
+    this.trySyncToClickup(tenantId, stage.pipelineId);
     return updated;
   }
 
@@ -188,6 +202,7 @@ export class PipelinesService {
     if (!pipeline) throw new NotFoundException('Pipeline não encontrado');
 
     await this.db.delete(stages).where(eq(stages.id, stageId));
+    this.trySyncToClickup(tenantId, stage.pipelineId);
     return { success: true };
   }
 
@@ -211,6 +226,7 @@ export class PipelinesService {
         .where(and(eq(stages.id, s.id), eq(stages.pipelineId, pipelineId)));
     }
 
+    this.trySyncToClickup(tenantId, pipelineId);
     return this.findOnePipeline(tenantId, pipelineId);
   }
 }

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { dashboardApi } from '@/services/api';
-import { Plus, Pencil, Trash2, X, GripVertical } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, GripVertical, Link2, Unlink, ArrowUpFromLine, ArrowDownToLine } from 'lucide-react';
 
 interface Stage {
   id: string;
@@ -132,6 +132,8 @@ export function PipelinesPage() {
                     ))}
                 </div>
               )}
+
+              <ClickupSyncSection pipelineId={pipeline.id} />
             </div>
           ))}
         </div>
@@ -271,6 +273,334 @@ function StageFormModal({ pipelineId, stage, onClose }: { pipelineId: string; st
             </button>
           </div>
         </form>
+      </div>
+    </div>
+  );
+}
+
+// --- ClickUp Sync Section ---
+
+interface ClickupSyncMapping {
+  id: string;
+  pipelineId: string;
+  clickupType: 'space' | 'list';
+  clickupEntityId: string;
+  clickupTeamId: string;
+  lastSyncAt: string | null;
+}
+
+function ClickupSyncSection({ pipelineId }: { pipelineId: string }) {
+  const queryClient = useQueryClient();
+  const [showConfig, setShowConfig] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+
+  const { data: clickupStatus } = useQuery({
+    queryKey: ['clickup-status'],
+    queryFn: () => dashboardApi.getClickupStatus(),
+    staleTime: 60_000,
+  });
+
+  const { data: syncMapping, isLoading: loadingMapping } = useQuery<ClickupSyncMapping>({
+    queryKey: ['clickup-sync', pipelineId],
+    queryFn: () => dashboardApi.getClickupSyncMapping(pipelineId) as Promise<ClickupSyncMapping>,
+    retry: false,
+  });
+
+  const disconnectMut = useMutation({
+    mutationFn: () => dashboardApi.deleteClickupSync(pipelineId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['clickup-sync', pipelineId] });
+      queryClient.invalidateQueries({ queryKey: ['clickup-sync-all'] });
+    },
+    onError: () => alert('Erro ao desconectar ClickUp'),
+  });
+
+  const isConnected = clickupStatus?.connected;
+  const hasMapping = !!syncMapping?.id;
+
+  async function handleForcePush() {
+    setSyncing(true);
+    try {
+      await dashboardApi.clickupForcePush(pipelineId);
+      queryClient.invalidateQueries({ queryKey: ['clickup-sync', pipelineId] });
+    } catch {
+      alert('Erro ao sincronizar KorIA → ClickUp');
+    } finally {
+      setSyncing(false);
+    }
+  }
+
+  async function handleForcePull() {
+    setSyncing(true);
+    try {
+      await dashboardApi.clickupForcePull(pipelineId);
+      queryClient.invalidateQueries({ queryKey: ['pipelines'] });
+      queryClient.invalidateQueries({ queryKey: ['clickup-sync', pipelineId] });
+    } catch {
+      alert('Erro ao sincronizar ClickUp → KorIA');
+    } finally {
+      setSyncing(false);
+    }
+  }
+
+  if (!isConnected) {
+    return (
+      <div className="mt-3 rounded border border-dashed px-3 py-2 text-xs text-muted-foreground">
+        <Link2 size={12} className="mr-1 inline" /> ClickUp não conectado. Configure em Integrações.
+      </div>
+    );
+  }
+
+  if (loadingMapping) {
+    return <div className="mt-3 h-8 animate-pulse rounded border bg-muted" />;
+  }
+
+  if (!hasMapping) {
+    return (
+      <>
+        <div className="mt-3 flex items-center gap-2">
+          <button
+            onClick={() => setShowConfig(true)}
+            className="flex items-center gap-1 rounded border px-2 py-1 text-xs hover:bg-secondary"
+          >
+            <Link2 size={12} /> Conectar ao ClickUp
+          </button>
+        </div>
+        {showConfig && (
+          <ClickupConnectModal
+            pipelineId={pipelineId}
+            onClose={() => setShowConfig(false)}
+          />
+        )}
+      </>
+    );
+  }
+
+  return (
+    <div className="mt-3 flex items-center gap-2 rounded border bg-muted/30 px-3 py-2 text-xs">
+      <Link2 size={12} className="text-green-600" />
+      <span className="flex-1">
+        Sincronizado com ClickUp ({syncMapping.clickupType}: {syncMapping.clickupEntityId})
+        {syncMapping.lastSyncAt && (
+          <span className="ml-1 text-muted-foreground">
+            — último sync: {new Date(syncMapping.lastSyncAt).toLocaleString('pt-BR')}
+          </span>
+        )}
+      </span>
+      <button
+        onClick={handleForcePush}
+        disabled={syncing}
+        title="Enviar etapas para ClickUp"
+        className="rounded p-1 hover:bg-secondary disabled:opacity-50"
+      >
+        <ArrowUpFromLine size={12} />
+      </button>
+      <button
+        onClick={handleForcePull}
+        disabled={syncing}
+        title="Buscar do ClickUp"
+        className="rounded p-1 hover:bg-secondary disabled:opacity-50"
+      >
+        <ArrowDownToLine size={12} />
+      </button>
+      <button
+        onClick={() => {
+          if (confirm('Desconectar pipeline do ClickUp?')) disconnectMut.mutate();
+        }}
+        title="Desconectar"
+        className="rounded p-1 text-muted-foreground hover:text-destructive"
+      >
+        <Unlink size={12} />
+      </button>
+    </div>
+  );
+}
+
+function ClickupConnectModal({ pipelineId, onClose }: { pipelineId: string; onClose: () => void }) {
+  const queryClient = useQueryClient();
+  const [step, setStep] = useState<'team' | 'space' | 'target'>('team');
+  const [selectedTeam, setSelectedTeam] = useState('');
+  const [selectedType, setSelectedType] = useState<'space' | 'list'>('space');
+  const [selectedEntity, setSelectedEntity] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  const { data: teamsData, isLoading: loadingTeams } = useQuery({
+    queryKey: ['clickup-teams'],
+    queryFn: () => dashboardApi.getClickupTeams(),
+  });
+
+  const { data: spacesData, isLoading: loadingSpaces } = useQuery({
+    queryKey: ['clickup-spaces', selectedTeam],
+    queryFn: () => dashboardApi.getClickupSpaces(selectedTeam),
+    enabled: !!selectedTeam,
+  });
+
+  const [selectedSpace, setSelectedSpace] = useState('');
+
+  const { data: listsData, isLoading: loadingLists } = useQuery({
+    queryKey: ['clickup-lists', selectedSpace],
+    queryFn: () => dashboardApi.getClickupLists(selectedSpace),
+    enabled: !!selectedSpace && selectedType === 'list',
+  });
+
+  const teams = teamsData?.teams || [];
+  const spaces = spacesData?.spaces || [];
+  const lists = listsData?.lists || [];
+
+  async function handleConnect() {
+    if (!selectedTeam || !selectedEntity) return;
+    setSaving(true);
+    try {
+      await dashboardApi.createClickupSync({
+        pipelineId,
+        clickupType: selectedType,
+        clickupEntityId: selectedEntity,
+        clickupTeamId: selectedTeam,
+      });
+      queryClient.invalidateQueries({ queryKey: ['clickup-sync', pipelineId] });
+      queryClient.invalidateQueries({ queryKey: ['pipelines'] });
+      onClose();
+    } catch {
+      alert('Erro ao conectar ao ClickUp');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={onClose}>
+      <div className="w-full max-w-md rounded-lg bg-card p-6 shadow-lg" onClick={(e) => e.stopPropagation()}>
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="text-lg font-semibold">Conectar ao ClickUp</h3>
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground"><X size={18} /></button>
+        </div>
+
+        <div className="space-y-4">
+          {/* Step 1: Team */}
+          <div>
+            <label className="mb-1 block text-sm font-medium">Workspace (Team)</label>
+            {loadingTeams ? (
+              <div className="h-9 animate-pulse rounded border bg-muted" />
+            ) : (
+              <select
+                value={selectedTeam}
+                onChange={(e) => {
+                  setSelectedTeam(e.target.value);
+                  setSelectedSpace('');
+                  setSelectedEntity('');
+                  if (e.target.value) setStep('space');
+                }}
+                className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+              >
+                <option value="">Selecione...</option>
+                {teams.map((t) => (
+                  <option key={t.id} value={t.id}>{t.name}</option>
+                ))}
+              </select>
+            )}
+          </div>
+
+          {/* Step 2: Type + target */}
+          {step !== 'team' && selectedTeam && (
+            <>
+              <div>
+                <label className="mb-1 block text-sm font-medium">Tipo de sincronização</label>
+                <div className="flex gap-3">
+                  <label className="flex items-center gap-1 text-sm">
+                    <input
+                      type="radio"
+                      name="syncType"
+                      checked={selectedType === 'space'}
+                      onChange={() => { setSelectedType('space'); setSelectedEntity(''); }}
+                    />
+                    Space (statuses)
+                  </label>
+                  <label className="flex items-center gap-1 text-sm">
+                    <input
+                      type="radio"
+                      name="syncType"
+                      checked={selectedType === 'list'}
+                      onChange={() => { setSelectedType('list'); setSelectedEntity(''); setSelectedSpace(''); }}
+                    />
+                    List (statuses)
+                  </label>
+                </div>
+              </div>
+
+              {selectedType === 'space' ? (
+                <div>
+                  <label className="mb-1 block text-sm font-medium">Space</label>
+                  {loadingSpaces ? (
+                    <div className="h-9 animate-pulse rounded border bg-muted" />
+                  ) : (
+                    <select
+                      value={selectedEntity}
+                      onChange={(e) => setSelectedEntity(e.target.value)}
+                      className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+                    >
+                      <option value="">Selecione...</option>
+                      {spaces.map((s) => (
+                        <option key={s.id} value={s.id}>{s.name} ({(s.statuses || []).length} status)</option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+              ) : (
+                <>
+                  <div>
+                    <label className="mb-1 block text-sm font-medium">Space</label>
+                    {loadingSpaces ? (
+                      <div className="h-9 animate-pulse rounded border bg-muted" />
+                    ) : (
+                      <select
+                        value={selectedSpace}
+                        onChange={(e) => { setSelectedSpace(e.target.value); setSelectedEntity(''); }}
+                        className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+                      >
+                        <option value="">Selecione...</option>
+                        {spaces.map((s) => (
+                          <option key={s.id} value={s.id}>{s.name}</option>
+                        ))}
+                      </select>
+                    )}
+                  </div>
+                  {selectedSpace && (
+                    <div>
+                      <label className="mb-1 block text-sm font-medium">List</label>
+                      {loadingLists ? (
+                        <div className="h-9 animate-pulse rounded border bg-muted" />
+                      ) : (
+                        <select
+                          value={selectedEntity}
+                          onChange={(e) => setSelectedEntity(e.target.value)}
+                          className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+                        >
+                          <option value="">Selecione...</option>
+                          {lists.map((l) => (
+                            <option key={l.id} value={l.id}>{l.name} ({(l.statuses || []).length} status)</option>
+                          ))}
+                        </select>
+                      )}
+                    </div>
+                  )}
+                </>
+              )}
+            </>
+          )}
+
+          <div className="flex justify-end gap-2 pt-2">
+            <button type="button" onClick={onClose} className="rounded-md border px-4 py-2 text-sm hover:bg-secondary">
+              Cancelar
+            </button>
+            <button
+              onClick={handleConnect}
+              disabled={saving || !selectedTeam || !selectedEntity}
+              className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+            >
+              {saving ? 'Conectando...' : 'Conectar'}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

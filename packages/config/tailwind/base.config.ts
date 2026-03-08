@@ -9,8 +9,25 @@ const baseConfig: Partial<Config> = {
   theme: {
     extend: {
       colors: {
+        // CSS variable based colors (shadcn pattern — from globals.css)
+        background: 'hsl(var(--background))',
+        foreground: 'hsl(var(--foreground))',
+        card: {
+          DEFAULT: 'hsl(var(--card))',
+          foreground: 'hsl(var(--card-foreground))',
+        },
+        muted: {
+          DEFAULT: 'hsl(var(--muted))',
+          foreground: 'hsl(var(--muted-foreground))',
+        },
+        destructive: {
+          DEFAULT: 'hsl(0 84.2% 60.2%)',
+          foreground: 'hsl(0 0% 98%)',
+        },
         // KorIA brand — verde da logo
         primary: {
+          DEFAULT: '#3da142',
+          foreground: 'hsl(var(--primary-foreground, 0 0% 98%))',
           50: '#edfcf2',
           100: '#d4f7e0',
           200: '#acedC5',
@@ -24,6 +41,8 @@ const baseConfig: Partial<Config> = {
           950: '#0c2613',
         },
         secondary: {
+          DEFAULT: 'hsl(var(--secondary, 220 14.3% 95.9%))',
+          foreground: 'hsl(var(--secondary-foreground, 220.9 39.3% 11%))',
           50: '#f5f5f5',
           100: '#e8e8e8',
           200: '#d4d4d4',
@@ -84,6 +103,12 @@ const baseConfig: Partial<Config> = {
         lg: '0.625rem',
         md: '0.5rem',
         sm: '0.375rem',
+      },
+      borderColor: {
+        DEFAULT: 'hsl(var(--border))',
+      },
+      ringColor: {
+        DEFAULT: 'hsl(var(--ring))',
       },
     },
   },
