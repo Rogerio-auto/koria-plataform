@@ -196,13 +196,6 @@ export class BriefingService {
       .limit(1);
 
     if (existing[0]?.uploadToken) {
-      // Reset qualification status so form is always fillable
-      const wo = await this.resolveToken(existing[0].uploadToken);
-      await this.db
-        .update(leadQualification)
-        .set({ status: 'pending', updatedAt: new Date() })
-        .where(eq(leadQualification.leadId, wo.leadId));
-
       this.logger.log(`Demo token reused: ${existing[0].uploadToken}`);
       return { token: existing[0].uploadToken };
     }
@@ -220,16 +213,9 @@ export class BriefingService {
 
     const leadId = leadResult[0]!.id;
 
-    // Create demo qualification (empty, pending)
-    await this.db
-      .insert(leadQualification)
-      .values({
-        tenantId,
-        leadId,
-        status: 'pending',
-      });
-
-    // Create demo work order with token
+    // Create demo work order with token (no qualification row needed —
+    // getFormConfig handles missing qualification gracefully, and
+    // submitBriefing does upsert)
     const token = `${DEMO_TOKEN_PREFIX}${Date.now().toString(36)}`;
     await this.db
       .insert(workOrders)
