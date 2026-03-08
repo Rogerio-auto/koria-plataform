@@ -44,7 +44,7 @@ export function ConversionFunnelChart({ data, isLoading }: ConversionFunnelChart
       <div className="space-y-1">
         {STEPS.map((step, idx) => {
           const s = data[step.key];
-          const widthPct = Math.max(s.rate, 5);
+          const widthPct = Math.min(Math.max(s.rate, 5), 100);
           return (
             <div key={step.key}>
               <div className="flex items-center gap-3">

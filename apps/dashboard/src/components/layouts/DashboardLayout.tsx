@@ -32,10 +32,10 @@ export function DashboardLayout() {
   const [assistantOpen, setAssistantOpen] = useState(false);
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex h-screen">
       {/* Sidebar */}
       <aside
-        className={`flex flex-col border-r bg-card transition-all duration-200 ${
+        className={`flex flex-shrink-0 flex-col border-r bg-card transition-all duration-200 overflow-y-auto ${
           sidebarOpen ? 'w-64' : 'w-16'
         }`}
       >
@@ -89,7 +89,7 @@ export function DashboardLayout() {
       </aside>
 
       {/* Main */}
-      <div className="flex flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex h-14 items-center justify-between border-b bg-card px-6">
           <div />
           <button

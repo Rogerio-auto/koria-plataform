@@ -317,7 +317,7 @@ function ClickupSyncSection({ pipelineId }: { pipelineId: string }) {
     onError: () => alert('Erro ao desconectar ClickUp'),
   });
 
-  const isConnected = clickupStatus?.connected;
+  const isConnected = clickupStatus?.configured ?? clickupStatus?.connected;
   const hasMapping = !!syncMapping?.id;
 
   async function handleForcePush() {

@@ -225,7 +225,7 @@ export const dashboardApi = {
     authFetch(`/pipelines/${pipelineId}/stages/reorder`, { method: 'POST', body: JSON.stringify({ stages }) }),
 
   // ClickUp Integration
-  getClickupStatus: () => authFetch<{ connected: boolean }>('/clickup/status'),
+  getClickupStatus: () => authFetch<{ configured: boolean; connected?: boolean }>('/clickup/status'),
   getClickupTeams: () => authFetch<{ teams: Array<{ id: string; name: string }> }>('/clickup/teams'),
   getClickupSpaces: (teamId: string) =>
     authFetch<{ spaces: Array<{ id: string; name: string; statuses: Array<{ status: string; type: string; color: string }> }> }>(`/clickup/teams/${teamId}/spaces`),
