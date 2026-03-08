@@ -1,11 +1,11 @@
-import { Injectable, Inject, Logger } from '@nestjs/common';
+import { Injectable, Inject, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { eq, and } from 'drizzle-orm';
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import FormData = require('form-data');
 import fetch from 'node-fetch';
 import { DATABASE_CONNECTION } from '../database/database.module';
-import { clickupSync, stages } from '@koria/database';
+import { clickupSync, stages, integrationTokens } from '@koria/database';
 
 export interface ClickupAttachmentResult {
   id: string;
@@ -20,7 +20,7 @@ export interface ClickupOAuthTokens {
 }
 
 @Injectable()
-export class ClickupService {
+export class ClickupService implements OnModuleInit {
   private readonly logger = new Logger(ClickupService.name);
   private readonly baseUrl = 'https://api.clickup.com/api/v2';
   private readonly clientId: string;
@@ -45,11 +45,60 @@ export class ClickupService {
         'CLICKUP_CLIENT_ID / CLICKUP_CLIENT_SECRET não configurados — integração ClickUp desabilitada',
       );
     }
+  }
 
+  async onModuleInit() {
+    // If no token from env, try loading from DB
     if (!this.accessToken) {
-      this.logger.warn(
-        'CLICKUP_ACCESS_TOKEN não configurado — use GET /clickup/authorize para obter o token via OAuth 2.0',
-      );
+      try {
+        const [row] = await this.db
+          .select()
+          .from(integrationTokens)
+          .where(eq(integrationTokens.provider, 'clickup'))
+          .limit(1);
+        if (row) {
+          this.accessToken = row.accessToken;
+          this.refreshToken = row.refreshToken || '';
+          this.logger.log('ClickUp token carregado do banco de dados');
+        } else {
+          this.logger.warn(
+            'ClickUp access token não encontrado — use GET /clickup/authorize para autorizar',
+          );
+        }
+      } catch (err) {
+        this.logger.warn('Não foi possível carregar token ClickUp do banco (tabela pode não existir)');
+      }
+    }
+  }
+
+  private async persistTokens(accessToken: string, refreshToken?: string) {
+    try {
+      const [existing] = await this.db
+        .select({ id: integrationTokens.id })
+        .from(integrationTokens)
+        .where(eq(integrationTokens.provider, 'clickup'))
+        .limit(1);
+
+      if (existing) {
+        await this.db
+          .update(integrationTokens)
+          .set({
+            accessToken,
+            refreshToken: refreshToken || null,
+            updatedAt: new Date(),
+          })
+          .where(eq(integrationTokens.id, existing.id));
+      } else {
+        await this.db.insert(integrationTokens).values({
+          provider: 'clickup',
+          accessToken,
+          refreshToken: refreshToken || null,
+          tokenType: 'Bearer',
+        });
+      }
+      this.logger.log('ClickUp tokens persistidos no banco de dados');
+    } catch (err) {
+      this.logger.error('Falha ao persistir tokens ClickUp no banco', (err as Error).message);
     }
   }
 
@@ -86,13 +135,14 @@ export class ClickupService {
 
     const data = (await response.json()) as ClickupOAuthTokens;
 
-    // Armazena em memória (para persistir, salve no banco ou .env)
+    // Armazena em memória e persiste no banco
     this.accessToken = data.access_token;
     if (data.refresh_token) {
       this.refreshToken = data.refresh_token;
     }
+    await this.persistTokens(data.access_token, data.refresh_token);
 
-    this.logger.log('ClickUp OAuth tokens obtidos com sucesso');
+    this.logger.log('ClickUp OAuth tokens obtidos e persistidos com sucesso');
     return data;
   }
 

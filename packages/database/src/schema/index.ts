@@ -29,5 +29,6 @@ export * from './invite-tokens';
 export * from './objections';
 export * from './objection-categories';
 export * from './clickup-sync';
+export * from './integration-tokens';
 export * from './assistant-conversations';
 export * from './assistant-action-logs';
