@@ -72,4 +72,89 @@ export class AnalyticsController {
   async getFollowupRate(@TenantId() tenantId: string) {
     return this.analyticsService.getFollowupConversionRate(tenantId);
   }
+
+  @Get('conversion-rates')
+  @ApiOperation({ summary: 'Conversion rates through the funnel' })
+  async getConversionRates(
+    @TenantId() tenantId: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    return this.analyticsService.getConversionRates(tenantId, startDate, endDate);
+  }
+
+  @Get('average-ticket')
+  @ApiOperation({ summary: 'Average ticket value with variation' })
+  async getAverageTicket(
+    @TenantId() tenantId: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    return this.analyticsService.getAverageTicket(tenantId, startDate, endDate);
+  }
+
+  @Get('funnel-by-pipeline')
+  @ApiOperation({ summary: 'Funnel data broken down by pipeline' })
+  async getFunnelByPipeline(
+    @TenantId() tenantId: string,
+    @Query('pipelineId') pipelineId?: string,
+  ) {
+    return this.analyticsService.getFunnelByPipeline(tenantId, pipelineId);
+  }
+
+  @Get('lead-sources')
+  @ApiOperation({ summary: 'Lead acquisition sources' })
+  async getLeadSources(
+    @TenantId() tenantId: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    return this.analyticsService.getLeadSources(tenantId, startDate, endDate);
+  }
+
+  @Get('channels-distribution')
+  @ApiOperation({ summary: 'Contact channels distribution' })
+  async getChannelsDistribution(@TenantId() tenantId: string) {
+    return this.analyticsService.getChannelsDistribution(tenantId);
+  }
+
+  @Get('quote-funnel')
+  @ApiOperation({ summary: 'Quote status funnel' })
+  async getQuoteFunnel(
+    @TenantId() tenantId: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    return this.analyticsService.getQuoteFunnel(tenantId, startDate, endDate);
+  }
+
+  @Get('work-order-status')
+  @ApiOperation({ summary: 'Work order status distribution and overdue count' })
+  async getWorkOrderStatus(@TenantId() tenantId: string) {
+    return this.analyticsService.getWorkOrderStatus(tenantId);
+  }
+
+  @Get('briefing-completion')
+  @ApiOperation({ summary: 'Briefing form completion rate' })
+  async getBriefingCompletion(@TenantId() tenantId: string) {
+    return this.analyticsService.getBriefingCompletion(tenantId);
+  }
+
+  @Get('recent-activity')
+  @ApiOperation({ summary: 'Recent events feed' })
+  async getRecentActivity(
+    @TenantId() tenantId: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.analyticsService.getRecentActivity(tenantId, limit ? parseInt(limit, 10) : 20);
+  }
+
+  @Get('pipeline-performance')
+  @ApiOperation({ summary: 'Full pipeline performance analytics' })
+  async getPipelinePerformance(
+    @TenantId() tenantId: string,
+    @Query('pipelineId') pipelineId: string,
+  ) {
+    return this.analyticsService.getPipelinePerformance(tenantId, pipelineId);
+  }
 }

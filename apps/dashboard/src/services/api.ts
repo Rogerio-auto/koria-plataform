@@ -107,6 +107,51 @@ export const dashboardApi = {
     return authFetch(`/analytics/ai-costs?${qs}`);
   },
   getFollowupRate: () => authFetch('/analytics/followup-rate'),
+  getErrors: (startDate?: string, endDate?: string) => {
+    const qs = new URLSearchParams();
+    if (startDate) qs.set('startDate', startDate);
+    if (endDate) qs.set('endDate', endDate);
+    return authFetch(`/analytics/errors?${qs}`);
+  },
+  getConversionRates: (startDate?: string, endDate?: string) => {
+    const qs = new URLSearchParams();
+    if (startDate) qs.set('startDate', startDate);
+    if (endDate) qs.set('endDate', endDate);
+    return authFetch(`/analytics/conversion-rates?${qs}`);
+  },
+  getAverageTicket: (startDate?: string, endDate?: string) => {
+    const qs = new URLSearchParams();
+    if (startDate) qs.set('startDate', startDate);
+    if (endDate) qs.set('endDate', endDate);
+    return authFetch(`/analytics/average-ticket?${qs}`);
+  },
+  getFunnelByPipeline: (pipelineId?: string) => {
+    const qs = new URLSearchParams();
+    if (pipelineId) qs.set('pipelineId', pipelineId);
+    return authFetch(`/analytics/funnel-by-pipeline?${qs}`);
+  },
+  getLeadSources: (startDate?: string, endDate?: string) => {
+    const qs = new URLSearchParams();
+    if (startDate) qs.set('startDate', startDate);
+    if (endDate) qs.set('endDate', endDate);
+    return authFetch(`/analytics/lead-sources?${qs}`);
+  },
+  getChannelsDistribution: () => authFetch('/analytics/channels-distribution'),
+  getQuoteFunnel: (startDate?: string, endDate?: string) => {
+    const qs = new URLSearchParams();
+    if (startDate) qs.set('startDate', startDate);
+    if (endDate) qs.set('endDate', endDate);
+    return authFetch(`/analytics/quote-funnel?${qs}`);
+  },
+  getWorkOrderStatus: () => authFetch('/analytics/work-order-status'),
+  getBriefingCompletion: () => authFetch('/analytics/briefing-completion'),
+  getRecentActivity: (limit?: number) => {
+    const qs = new URLSearchParams();
+    if (limit) qs.set('limit', String(limit));
+    return authFetch(`/analytics/recent-activity?${qs}`);
+  },
+  getPipelinePerformance: (pipelineId: string) =>
+    authFetch(`/analytics/pipeline-performance?pipelineId=${encodeURIComponent(pipelineId)}`),
 
   // Objections
   getObjectionsOverview: (startDate?: string, endDate?: string) => {

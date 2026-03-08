@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { dashboardApi } from '@/services/api';
 import { Plus, Pencil, Trash2, X, GripVertical, Link2, Unlink, ArrowUpFromLine, ArrowDownToLine } from 'lucide-react';
+import { PipelineAnalyticsPanel } from '@/components/charts/PipelineAnalyticsPanel';
 
 interface Stage {
   id: string;
@@ -134,6 +135,7 @@ export function PipelinesPage() {
               )}
 
               <ClickupSyncSection pipelineId={pipeline.id} />
+              <PipelineAnalyticsPanel pipelineId={pipeline.id} />
             </div>
           ))}
         </div>
