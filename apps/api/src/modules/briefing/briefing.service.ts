@@ -5,12 +5,19 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
-import { eq } from 'drizzle-orm';
+import { eq, like } from 'drizzle-orm';
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import { DATABASE_CONNECTION } from '../database/database.module';
 import { leads, leadQualification, workOrders } from '@koria/database';
+import { ConfigService } from '@nestjs/config';
 import { ClickupService } from '../clickup/clickup.service';
 import { SubmitBriefingDto } from './dto/submit-briefing.dto';
+
+const DEMO_TOKEN_PREFIX = 'demo-';
+
+function isDemoToken(token: string): boolean {
+  return token.startsWith(DEMO_TOKEN_PREFIX);
+}
 
 @Injectable()
 export class BriefingService {
@@ -20,6 +27,7 @@ export class BriefingService {
     @Inject(DATABASE_CONNECTION)
     private readonly db: PostgresJsDatabase,
     private readonly clickupService: ClickupService,
+    private readonly config: ConfigService,
   ) {}
 
   /** Resolve uploadToken → workOrder + lead info */
@@ -78,7 +86,7 @@ export class BriefingService {
       email: qualification?.email ?? null,
       phone: qualification?.phoneNumber ?? null,
       status: qualification?.status ?? 'pending',
-      alreadySubmitted: qualification?.status === 'completed',
+      alreadySubmitted: isDemoToken(token) ? false : qualification?.status === 'completed',
     };
   }
 
@@ -170,6 +178,70 @@ export class BriefingService {
     }
 
     return { success: true };
+  }
+
+  // ── Demo token management ─────────────────────────────
+
+  async getOrCreateDemoToken(): Promise<{ token: string }> {
+    const tenantId = this.config.get<string>('DEFAULT_TENANT_ID');
+    if (!tenantId) {
+      throw new BadRequestException('DEFAULT_TENANT_ID not configured');
+    }
+
+    // Check if a demo work order already exists
+    const existing = await this.db
+      .select({ uploadToken: workOrders.uploadToken })
+      .from(workOrders)
+      .where(like(workOrders.uploadToken, `${DEMO_TOKEN_PREFIX}%`))
+      .limit(1);
+
+    if (existing[0]?.uploadToken) {
+      // Reset qualification status so form is always fillable
+      const wo = await this.resolveToken(existing[0].uploadToken);
+      await this.db
+        .update(leadQualification)
+        .set({ status: 'pending', updatedAt: new Date() })
+        .where(eq(leadQualification.leadId, wo.leadId));
+
+      this.logger.log(`Demo token reused: ${existing[0].uploadToken}`);
+      return { token: existing[0].uploadToken };
+    }
+
+    // Create demo lead
+    const leadResult = await this.db
+      .insert(leads)
+      .values({
+        tenantId,
+        type: 'person',
+        displayName: 'Cliente Demonstração',
+        status: 'active',
+      })
+      .returning({ id: leads.id });
+
+    const leadId = leadResult[0]!.id;
+
+    // Create demo qualification (empty, pending)
+    await this.db
+      .insert(leadQualification)
+      .values({
+        tenantId,
+        leadId,
+        status: 'pending',
+      });
+
+    // Create demo work order with token
+    const token = `${DEMO_TOKEN_PREFIX}${Date.now().toString(36)}`;
+    await this.db
+      .insert(workOrders)
+      .values({
+        tenantId,
+        leadId,
+        status: 'created',
+        uploadToken: token,
+      });
+
+    this.logger.log(`Demo token created: ${token} (lead: ${leadId})`);
+    return { token };
   }
 
   // ── ClickUp integration ──────────────────────────────
