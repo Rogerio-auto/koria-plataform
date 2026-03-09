@@ -65,6 +65,10 @@ export interface SubmitBriefingDto {
   referencesUrls?: string[];
   howFoundUs?: string;
   additionalNotes?: string;
+
+  // Dynamic form builder
+  formConfigId?: string;
+  dynamicFields?: Record<string, unknown>;
 }
 
 /**

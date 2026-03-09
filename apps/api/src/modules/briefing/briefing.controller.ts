@@ -32,6 +32,12 @@ export class BriefingController {
     return { url, statusCode: 302 };
   }
 
+  @Get(':token/schema')
+  @ApiOperation({ summary: 'Get dynamic form schema for a briefing token' })
+  async getFormSchema(@Param('token') token: string) {
+    return this.briefingService.getFormSchema(token);
+  }
+
   @Get(':token')
   @ApiOperation({ summary: 'Get briefing form config by upload token' })
   async getFormConfig(@Param('token') token: string) {

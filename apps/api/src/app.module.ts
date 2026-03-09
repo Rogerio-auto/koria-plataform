@@ -19,6 +19,7 @@ import { WebhookModule } from './modules/webhook/webhook.module';
 import { ObjectionsModule } from './modules/objections/objections.module';
 import { AssistantModule } from './modules/assistant/assistant.module';
 import { PipelinesModule } from './modules/pipelines/pipelines.module';
+import { SettingsModule } from './modules/settings/settings.module';
 
 @Module({
   imports: [
@@ -48,6 +49,9 @@ import { PipelinesModule } from './modules/pipelines/pipelines.module';
     // Integration modules
     ClickupModule,
     WebhookModule,
+
+    // Settings
+    SettingsModule,
   ],
 })
 export class AppModule {}

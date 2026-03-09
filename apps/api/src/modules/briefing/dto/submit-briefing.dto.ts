@@ -220,4 +220,17 @@ export class SubmitBriefingDto {
   @IsOptional()
   @IsString()
   additionalNotes?: string;
+
+  // ── Dynamic form builder fields ──────────────────────
+
+  /** UUID of the briefing_form_configs row used (dynamic form) */
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  formConfigId?: string;
+
+  /** All field values keyed by field id (dynamic form) */
+  @ApiPropertyOptional({ description: 'Dynamic field values keyed by field id' })
+  @IsOptional()
+  dynamicFields?: Record<string, unknown>;
 }

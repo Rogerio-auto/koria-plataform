@@ -2,7 +2,7 @@
  * core.lead_qualification — Detailed lead qualification data (briefing form)
  * Includes real-estate video production briefing fields.
  */
-import { uuid, text, integer, timestamp } from 'drizzle-orm/pg-core';
+import { uuid, text, integer, timestamp, jsonb } from 'drizzle-orm/pg-core';
 import { coreSchema, tenants } from './tenants';
 import { leads } from './leads';
 
@@ -77,6 +77,10 @@ export const leadQualification = coreSchema.table('lead_qualification', {
   submittedAt: timestamp('submitted_at', { withTimezone: true }),
   ipAddress: text('ip_address'),
   userAgent: text('user_agent'),
+  // ── Dynamic form builder ──────────────────────────
+  customFields: jsonb('custom_fields').default({}),
+  formConfigId: uuid('form_config_id'),
+
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   completedAt: timestamp('completed_at', { withTimezone: true }),

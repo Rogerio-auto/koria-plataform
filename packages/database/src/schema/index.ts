@@ -32,3 +32,4 @@ export * from './clickup-sync';
 export * from './integration-tokens';
 export * from './assistant-conversations';
 export * from './assistant-action-logs';
+export * from './briefing-form-configs';

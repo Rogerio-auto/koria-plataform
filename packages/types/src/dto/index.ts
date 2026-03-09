@@ -8,3 +8,4 @@ export * from './objections.dto';
 export * from './assistant.dto';
 export * from './products.dto';
 export * from './leads.dto';
+export * from './briefing-form-config.dto';

@@ -28,6 +28,7 @@ export const workOrders = coreSchema.table('work_orders', {
   externalTaskId: text('external_task_id'),
   briefing: jsonb('briefing').notNull().default({}),
   uploadToken: text('upload_token').unique(),
+  formConfigId: uuid('form_config_id'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });

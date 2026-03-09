@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { MulterModule } from '@nestjs/platform-express';
 import { BriefingController } from './briefing.controller';
 import { BriefingService } from './briefing.service';
+import { SettingsModule } from '../settings/settings.module';
 
 @Module({
   imports: [
@@ -11,6 +12,7 @@ import { BriefingService } from './briefing.service';
         files: 1,
       },
     }),
+    SettingsModule,
   ],
   controllers: [BriefingController],
   providers: [BriefingService],

@@ -11,6 +11,7 @@ import { DATABASE_CONNECTION } from '../database/database.module';
 import { leads, leadQualification, workOrders } from '@koria/database';
 import { ConfigService } from '@nestjs/config';
 import { ClickupService } from '../clickup/clickup.service';
+import { BriefingFormConfigService } from '../settings/briefing-form-config.service';
 import { SubmitBriefingDto } from './dto/submit-briefing.dto';
 
 const DEMO_TOKEN_PREFIX = 'demo-';
@@ -28,6 +29,7 @@ export class BriefingService {
     private readonly db: PostgresJsDatabase,
     private readonly clickupService: ClickupService,
     private readonly config: ConfigService,
+    private readonly formConfigService: BriefingFormConfigService,
   ) {}
 
   /** Resolve uploadToken → workOrder + lead info */
@@ -90,6 +92,61 @@ export class BriefingService {
     };
   }
 
+  /** Returns the dynamic form schema for rendering, or null if no config exists */
+  async getFormSchema(token: string) {
+    const wo = await this.resolveToken(token);
+
+    // Check if the work order has a specific config, otherwise use tenant's active config
+    let config: Awaited<ReturnType<BriefingFormConfigService['getActiveForTenant']>> = null;
+
+    if (wo.externalTaskId) {
+      // Check work order's form_config_id column
+      const woFull = await this.db
+        .select({ formConfigId: workOrders.formConfigId })
+        .from(workOrders)
+        .where(eq(workOrders.id, wo.workOrderId))
+        .limit(1);
+
+      if (woFull[0]?.formConfigId) {
+        config = await this.formConfigService.findById(woFull[0].formConfigId);
+      }
+    }
+
+    if (!config) {
+      config = await this.formConfigService.getActiveForTenant(wo.tenantId);
+    }
+
+    if (!config) {
+      // No dynamic config — client should render legacy form
+      return { legacy: true };
+    }
+
+    // Prefill with lead data
+    const leadResult = await this.db
+      .select({ displayName: leads.displayName })
+      .from(leads)
+      .where(eq(leads.id, wo.leadId))
+      .limit(1);
+
+    const qualResult = await this.db
+      .select({ email: leadQualification.email, phoneNumber: leadQualification.phoneNumber })
+      .from(leadQualification)
+      .where(eq(leadQualification.leadId, wo.leadId))
+      .limit(1);
+
+    return {
+      formConfigId: config.id,
+      version: config.version,
+      steps: config.steps,
+      settings: config.settings,
+      prefill: {
+        fullName: leadResult[0]?.displayName ?? '',
+        email: qualResult[0]?.email ?? '',
+        phoneNumber: qualResult[0]?.phoneNumber ?? '',
+      },
+    };
+  }
+
   async submitBriefing(dto: SubmitBriefingDto) {
     const wo = await this.resolveToken(dto.token);
 
@@ -101,7 +158,135 @@ export class BriefingService {
 
     const now = new Date();
 
-    const raw = {
+    // Build the values to persist depending on legacy vs dynamic mode
+    let values: Record<string, unknown>;
+
+    if (dto.formConfigId && dto.dynamicFields) {
+      // ── Dynamic form mode ──────────────────────────────
+      values = this.buildDynamicValues(dto, wo, now);
+    } else {
+      // ── Legacy hardcoded mode ──────────────────────────
+      values = this.buildLegacyValues(dto, wo, now);
+    }
+
+    try {
+      if (existing[0]) {
+        await this.db
+          .update(leadQualification)
+          .set(values as any)
+          .where(eq(leadQualification.leadId, wo.leadId));
+
+        this.logger.log(`Briefing updated for lead ${wo.leadId}`);
+      } else {
+        await this.db
+          .insert(leadQualification)
+          .values(values as any);
+
+        this.logger.log(`Briefing created for lead ${wo.leadId}`);
+      }
+    } catch (error) {
+      this.logger.error(`DB error saving briefing for lead ${wo.leadId}: ${error}`);
+      throw error;
+    }
+
+    // ── Sync to ClickUp (non-blocking) ──────────────────
+    if (wo.externalTaskId && this.clickupService.isConfigured()) {
+      this.syncToClickUp(wo.externalTaskId, dto).catch((err) => {
+        this.logger.error(`ClickUp sync failed: ${err}`);
+      });
+    }
+
+    return { success: true };
+  }
+
+  /** Map field values from dynamic config → DB columns + custom_fields JSONB */
+  private buildDynamicValues(
+    dto: SubmitBriefingDto,
+    wo: { tenantId: string; leadId: string },
+    now: Date,
+  ): Record<string, unknown> {
+    const dynamicFields = dto.dynamicFields ?? {};
+
+    // Known column names in lead_qualification (camelCase → DB column mapping)
+    const columnMap: Record<string, string> = {
+      full_name: 'fullName',
+      email: 'email',
+      phone_number: 'phoneNumber',
+      instagram_personal: 'instagramPersonal',
+      instagram_company: 'instagramCompany',
+      linkedin_url: 'linkedinUrl',
+      website_url: 'websiteUrl',
+      company_name: 'companyName',
+      company_size: 'companySize',
+      industry: 'industry',
+      role_in_company: 'roleInCompany',
+      property_name: 'propertyName',
+      property_address: 'propertyAddress',
+      property_units: 'propertyUnits',
+      property_unit_sizes: 'propertyUnitSizes',
+      property_differentials: 'propertyDifferentials',
+      brand_colors: 'brandColors',
+      communication_tone: 'communicationTone',
+      visual_references: 'visualReferences',
+      target_audience: 'targetAudience',
+      main_emotion: 'mainEmotion',
+      mandatory_elements: 'mandatoryElements',
+      elements_to_avoid: 'elementsToAvoid',
+      price_range: 'priceRange',
+      payment_conditions: 'paymentConditions',
+      launch_date: 'launchDate',
+      realtor_contact: 'realtorContact',
+      voiceover_text: 'voiceoverText',
+      music_preference: 'musicPreference',
+      legal_disclaimers: 'legalDisclaimers',
+      additional_notes: 'additionalNotes',
+      how_found_us: 'howFoundUs',
+      budget_range: 'budgetRange',
+      project_type: 'projectType',
+      project_goal: 'projectGoal',
+      project_description: 'projectDescription',
+      deadline: 'deadline',
+    };
+
+    // Reverse map: camelCase property → snake_case column
+    const reverseMap: Record<string, string> = {};
+    for (const [col, camel] of Object.entries(columnMap)) {
+      reverseMap[camel] = col;
+    }
+
+    // All valid camelCase column keys
+    const validColumns = new Set(Object.values(columnMap));
+
+    const mapped: Record<string, unknown> = {
+      tenantId: wo.tenantId,
+      leadId: wo.leadId,
+      status: 'completed' as const,
+      formConfigId: dto.formConfigId,
+      submittedAt: now,
+      completedAt: now,
+      updatedAt: now,
+    };
+    const customFields: Record<string, unknown> = {};
+
+    for (const [fieldId, value] of Object.entries(dynamicFields)) {
+      if (validColumns.has(fieldId)) {
+        mapped[fieldId] = value ?? null;
+      } else {
+        customFields[fieldId] = value;
+      }
+    }
+
+    mapped.customFields = customFields;
+    return mapped;
+  }
+
+  /** Build values from the legacy hardcoded DTO fields */
+  private buildLegacyValues(
+    dto: SubmitBriefingDto,
+    wo: { tenantId: string; leadId: string },
+    now: Date,
+  ): Record<string, unknown> {
+    return {
       tenantId: wo.tenantId,
       leadId: wo.leadId,
       status: 'completed' as const,
@@ -147,37 +332,6 @@ export class BriefingService {
       completedAt: now,
       updatedAt: now,
     };
-
-    const values = raw;
-
-    try {
-      if (existing[0]) {
-        await this.db
-          .update(leadQualification)
-          .set(values)
-          .where(eq(leadQualification.leadId, wo.leadId));
-
-        this.logger.log(`Briefing updated for lead ${wo.leadId}`);
-      } else {
-        await this.db
-          .insert(leadQualification)
-          .values(values);
-
-        this.logger.log(`Briefing created for lead ${wo.leadId}`);
-      }
-    } catch (error) {
-      this.logger.error(`DB error saving briefing for lead ${wo.leadId}: ${error}`);
-      throw error;
-    }
-
-    // ── Sync to ClickUp (non-blocking) ──────────────────
-    if (wo.externalTaskId && this.clickupService.isConfigured()) {
-      this.syncToClickUp(wo.externalTaskId, dto).catch((err) => {
-        this.logger.error(`ClickUp sync failed: ${err}`);
-      });
-    }
-
-    return { success: true };
   }
 
   // ── Demo token management ─────────────────────────────
