@@ -241,4 +241,22 @@ export const dashboardApi = {
     authFetch(`/clickup/sync/${pipelineId}/push`, { method: 'POST' }),
   clickupForcePull: (pipelineId: string) =>
     authFetch(`/clickup/sync/${pipelineId}/pull`, { method: 'POST' }),
+
+  // Settings — Briefing Form Config
+  getBriefingFormConfigs: () =>
+    authFetch<any[]>('/settings/briefing-form'),
+  getBriefingFormConfig: (id: string) =>
+    authFetch<any>(`/settings/briefing-form/${encodeURIComponent(id)}`),
+  createBriefingFormConfig: (data: { name: string; steps: any[]; settings?: any }) =>
+    authFetch<any>('/settings/briefing-form', { method: 'POST', body: JSON.stringify(data) }),
+  updateBriefingFormConfig: (id: string, data: { name?: string; steps?: any[]; settings?: any }) =>
+    authFetch<any>(`/settings/briefing-form/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(data) }),
+  publishBriefingFormConfig: (id: string) =>
+    authFetch<any>(`/settings/briefing-form/${encodeURIComponent(id)}/publish`, { method: 'POST' }),
+  deleteBriefingFormConfig: (id: string) =>
+    authFetch(`/settings/briefing-form/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+  duplicateBriefingFormConfig: (id: string) =>
+    authFetch<any>(`/settings/briefing-form/${encodeURIComponent(id)}/duplicate`, { method: 'POST' }),
+  getBriefingFormTemplates: () =>
+    authFetch<any[]>('/settings/briefing-form/templates'),
 };

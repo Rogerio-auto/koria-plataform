@@ -14,6 +14,7 @@ import { WorkOrdersPage } from '@/pages/WorkOrdersPage';
 import { PaymentsPage } from '@/pages/PaymentsPage';
 import { ProductsPage } from '@/pages/ProductsPage';
 import { PipelinesPage } from '@/pages/PipelinesPage';
+import { BriefingFormBuilderPage } from '@/pages/BriefingFormBuilderPage';
 
 export function App() {
   return (
@@ -39,6 +40,7 @@ export function App() {
           {/* Admin/Manager only */}
           <Route element={<ProtectedRoute roles={['admin', 'manager']} />}>
             <Route path="settings/users" element={<UsersPage />} />
+            <Route path="settings/briefing-form" element={<BriefingFormBuilderPage />} />
           </Route>
         </Route>
       </Route>

@@ -13,6 +13,7 @@ import {
   UserCheck,
   Package,
   GitBranch,
+  FileEdit,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -23,6 +24,7 @@ const navItems = [
   { to: '/pipelines', label: 'Pipelines', icon: GitBranch },
   { to: '/objections', label: 'Objeções', icon: ShieldAlert },
   { to: '/settings/users', label: 'Usuários', icon: Users, roles: ['admin', 'manager'] },
+  { to: '/settings/briefing-form', label: 'Form Briefing', icon: FileEdit, roles: ['admin', 'manager'] },
   { to: '/settings', label: 'Configurações', icon: Settings },
 ];
 
