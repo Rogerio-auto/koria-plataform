@@ -28,6 +28,7 @@ export * from './analytics-users';
 export * from './invite-tokens';
 export * from './objections';
 export * from './objection-categories';
+export * from './briefing-form-configs';
 export * from './clickup-sync';
 export * from './integration-tokens';
 export * from './assistant-conversations';
