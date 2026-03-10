@@ -97,7 +97,9 @@ export function BriefingFormBuilderPage() {
   async function handleSave() {
     if (!selectedId) return;
     try {
-      await updateMutation.mutateAsync({ id: selectedId, data: { name, steps, settings } });
+      // Published configs: only send settings (name/steps are locked)
+      const data = isPublished ? { settings } : { name, steps, settings };
+      await updateMutation.mutateAsync({ id: selectedId, data });
       setDirty(false);
       showFeedback('Salvo com sucesso');
     } catch {
@@ -163,8 +165,9 @@ export function BriefingFormBuilderPage() {
           {feedback && (
             <span className="rounded-md bg-primary/10 px-3 py-1 text-sm text-primary">{feedback}</span>
           )}
-          {selectedId && !isPublished && (
+          {selectedId && (
             <>
+              {/* Save: always visible (settings can be saved even when published) */}
               <button
                 onClick={handleSave}
                 disabled={isSaving || !dirty}
@@ -173,14 +176,16 @@ export function BriefingFormBuilderPage() {
                 <Save size={14} />
                 {isSaving ? 'Salvando…' : 'Salvar'}
               </button>
-              <button
-                onClick={handlePublish}
-                disabled={isPublishing}
-                className="flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
-              >
-                <Rocket size={14} />
-                {isPublishing ? 'Publicando…' : 'Publicar'}
-              </button>
+              {!isPublished && (
+                <button
+                  onClick={handlePublish}
+                  disabled={isPublishing}
+                  className="flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+                >
+                  <Rocket size={14} />
+                  {isPublishing ? 'Publicando…' : 'Publicar'}
+                </button>
+              )}
             </>
           )}
         </div>

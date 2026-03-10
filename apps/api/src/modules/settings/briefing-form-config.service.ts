@@ -72,11 +72,11 @@ export class BriefingFormConfigService {
     return result[0];
   }
 
-  /** Update a draft config */
+  /** Update a config (settings always allowed; name/steps only on drafts) */
   async update(id: string, dto: UpdateBriefingFormConfigDto) {
     const existing = await this.findById(id);
-    if (existing.status === 'published') {
-      throw new ConflictException('Cannot edit a published config. Duplicate it first.');
+    if (existing.status === 'published' && (dto.name !== undefined || dto.steps !== undefined)) {
+      throw new ConflictException('Cannot edit name/steps of a published config. Duplicate it first.');
     }
 
     const setValues: Record<string, unknown> = { updatedAt: new Date() };

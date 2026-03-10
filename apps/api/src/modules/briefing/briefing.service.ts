@@ -196,6 +196,11 @@ export class BriefingService {
       });
     }
 
+    // ── Fire webhook (non-blocking) ─────────────────────
+    this.fireWebhookIfConfigured(wo.tenantId, wo.leadId).catch((err) => {
+      this.logger.error(`Webhook dispatch failed: ${err}`);
+    });
+
     return { success: true };
   }
 
@@ -382,6 +387,36 @@ export class BriefingService {
 
     this.logger.log(`Demo token created: ${token} (lead: ${leadId})`);
     return { token };
+  }
+
+  // ── Webhook dispatch ──────────────────────────────
+
+  private async fireWebhookIfConfigured(tenantId: string, leadId: string) {
+    const config = await this.formConfigService.getActiveForTenant(tenantId);
+    const settings = (config?.settings ?? {}) as Record<string, any>;
+    const integrations = settings.integrations ?? {};
+
+    if (!integrations.fireWebhook) return;
+
+    const url = integrations.webhookUrl || this.config.get<string>('N8N_WEBHOOK_URL');
+    if (!url) {
+      this.logger.warn(`Webhook enabled but no URL configured for tenant ${tenantId}`);
+      return;
+    }
+
+    const payload = { lead_id: leadId, tenant_id: tenantId };
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Webhook returned ${response.status}: ${await response.text()}`);
+    }
+
+    this.logger.log(`Webhook dispatched to ${url} for lead ${leadId}`);
   }
 
   // ── ClickUp integration ──────────────────────────────

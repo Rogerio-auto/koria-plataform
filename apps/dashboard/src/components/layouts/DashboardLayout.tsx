@@ -4,7 +4,6 @@ import { useUiStore } from '@/stores/ui.store';
 import {
   LayoutDashboard,
   ShieldAlert,
-  Users,
   Settings,
   LogOut,
   MessageSquare,
@@ -13,7 +12,6 @@ import {
   UserCheck,
   Package,
   GitBranch,
-  FileEdit,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -23,8 +21,6 @@ const navItems = [
   { to: '/products', label: 'Produtos', icon: Package },
   { to: '/pipelines', label: 'Pipelines', icon: GitBranch },
   { to: '/objections', label: 'Objeções', icon: ShieldAlert },
-  { to: '/settings/users', label: 'Usuários', icon: Users, roles: ['admin', 'manager'] },
-  { to: '/settings/briefing-form', label: 'Form Briefing', icon: FileEdit, roles: ['admin', 'manager'] },
   { to: '/settings', label: 'Configurações', icon: Settings },
 ];
 
@@ -52,9 +48,7 @@ export function DashboardLayout() {
         </div>
 
         <nav className="flex-1 space-y-1 p-2">
-          {navItems
-            .filter((item) => !item.roles || (user && item.roles.includes(user.role)))
-            .map((item) => (
+          {navItems.map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}

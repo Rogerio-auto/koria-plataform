@@ -1,10 +1,12 @@
 import { useState, type FormEvent } from 'react';
+import { Link } from 'react-router-dom';
 import { dashboardApi } from '@/services/api';
 import { useAuthStore } from '@/stores/auth.store';
-import { Settings } from 'lucide-react';
+import { Settings, Users, FileEdit, ChevronRight } from 'lucide-react';
 
 export function SettingsPage() {
   const user = useAuthStore((s) => s.user);
+  const isAdminOrManager = user?.role === 'admin' || user?.role === 'manager';
 
   return (
     <div className="space-y-6">
@@ -12,6 +14,38 @@ export function SettingsPage() {
         <Settings size={24} className="text-primary" />
         <h2 className="text-2xl font-bold">Configurações</h2>
       </div>
+
+      {/* Admin/Manager sub-pages */}
+      {isAdminOrManager && (
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Link
+            to="/settings/users"
+            className="flex items-center justify-between rounded-lg border bg-card p-4 transition-colors hover:bg-secondary"
+          >
+            <div className="flex items-center gap-3">
+              <Users size={20} className="text-primary" />
+              <div>
+                <p className="text-sm font-medium">Usuários</p>
+                <p className="text-xs text-muted-foreground">Gerenciar usuários e convites</p>
+              </div>
+            </div>
+            <ChevronRight size={16} className="text-muted-foreground" />
+          </Link>
+          <Link
+            to="/settings/briefing-form"
+            className="flex items-center justify-between rounded-lg border bg-card p-4 transition-colors hover:bg-secondary"
+          >
+            <div className="flex items-center gap-3">
+              <FileEdit size={20} className="text-primary" />
+              <div>
+                <p className="text-sm font-medium">Formulário de Briefing</p>
+                <p className="text-xs text-muted-foreground">Configurar etapas, campos e integrações</p>
+              </div>
+            </div>
+            <ChevronRight size={16} className="text-muted-foreground" />
+          </Link>
+        </div>
+      )}
 
       <div className="rounded-lg border bg-card p-4">
         <h3 className="mb-4 text-sm font-medium">Meu Perfil</h3>
