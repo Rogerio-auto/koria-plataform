@@ -5,10 +5,10 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
-import { eq, like } from 'drizzle-orm';
+import { eq, like, desc } from 'drizzle-orm';
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import { DATABASE_CONNECTION } from '../database/database.module';
-import { leads, leadQualification, workOrders } from '@koria/database';
+import { leads, leadQualification, workOrders, conversations } from '@koria/database';
 import { ConfigService } from '@nestjs/config';
 import { ClickupService } from '../clickup/clickup.service';
 import { BriefingFormConfigService } from '../settings/briefing-form-config.service';
@@ -404,7 +404,19 @@ export class BriefingService {
       return;
     }
 
-    const payload = { lead_id: leadId, tenant_id: tenantId };
+    // Fetch the most recent conversation for this lead (session_id)
+    const convRow = await this.db
+      .select({ id: conversations.id })
+      .from(conversations)
+      .where(eq(conversations.leadId, leadId))
+      .orderBy(desc(conversations.createdAt))
+      .limit(1);
+
+    const payload = {
+      lead_id: leadId,
+      tenant_id: tenantId,
+      session_id: convRow[0]?.id ?? null,
+    };
 
     const response = await fetch(url, {
       method: 'POST',
