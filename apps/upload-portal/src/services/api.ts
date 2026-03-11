@@ -8,6 +8,8 @@ export interface WorkOrderInfo {
   status: string;
   dueAt: string | null;
   externalTaskId: string | null;
+  channel: string | null;
+  returnUrl: string | null;
 }
 
 export interface UploadedFile {

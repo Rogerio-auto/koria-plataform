@@ -33,11 +33,12 @@ export function BriefingForm({ token }: BriefingFormProps) {
     isLoadingConfig,
     configError,
     submitSuccess,
+    formConfig,
   } = useBriefingForm(token);
 
   useEffect(() => {
-    if (submitSuccess) navigate('/briefing/success', { replace: true });
-  }, [submitSuccess, navigate]);
+    if (submitSuccess) navigate('/briefing/success', { replace: true, state: { returnUrl: formConfig?.returnUrl } });
+  }, [submitSuccess, navigate, formConfig]);
 
   const stepLabels = [
     t('briefing.steps.property'),

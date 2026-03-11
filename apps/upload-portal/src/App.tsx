@@ -50,7 +50,7 @@ export function App() {
     case 'invalid':
       return <InvalidTokenPage />;
     case 'success':
-      return <SuccessPage />;
+      return <SuccessPage returnUrl={workOrder?.returnUrl ?? null} />;
     case 'valid':
       return (
         <UploadPage

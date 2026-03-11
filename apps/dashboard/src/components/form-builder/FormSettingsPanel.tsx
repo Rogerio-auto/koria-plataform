@@ -124,6 +124,52 @@ export function FormSettingsPanel({ settings, onChange }: FormSettingsPanelProps
           </div>
         </div>
       </section>
+
+      {/* Return Channels */}
+      <section>
+        <h4 className="mb-2 text-sm font-semibold">Link de Retorno</h4>
+        <p className="mb-3 text-xs text-muted-foreground">
+          Configure os canais para redirecionar o lead após enviar o formulário ou uploads.
+        </p>
+        <div className="space-y-3">
+          <div>
+            <label className="mb-1 block text-xs text-muted-foreground">WhatsApp (número com DDI)</label>
+            <input
+              value={settings.integrations?.returnChannels?.whatsapp ?? ''}
+              onChange={(e) => set('integrations.returnChannels.whatsapp', e.target.value || undefined)}
+              placeholder="5511999999999"
+              className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-xs text-muted-foreground">Instagram (@usuário)</label>
+            <input
+              value={settings.integrations?.returnChannels?.instagram ?? ''}
+              onChange={(e) => set('integrations.returnChannels.instagram', e.target.value || undefined)}
+              placeholder="@koriastudio"
+              className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-xs text-muted-foreground">Messenger (page ID ou username)</label>
+            <input
+              value={settings.integrations?.returnChannels?.messenger ?? ''}
+              onChange={(e) => set('integrations.returnChannels.messenger', e.target.value || undefined)}
+              placeholder="koriastudio"
+              className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-xs text-muted-foreground">Telegram (@usuário)</label>
+            <input
+              value={settings.integrations?.returnChannels?.telegram ?? ''}
+              onChange={(e) => set('integrations.returnChannels.telegram', e.target.value || undefined)}
+              placeholder="@koriastudio"
+              className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+            />
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

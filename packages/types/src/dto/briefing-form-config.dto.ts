@@ -80,6 +80,12 @@ export interface FormSettings {
     syncToClickUp?: boolean;
     fireWebhook?: boolean;
     webhookUrl?: string;
+    returnChannels?: {
+      whatsapp?: string;
+      instagram?: string;
+      messenger?: string;
+      telegram?: string;
+    };
   };
 }
 

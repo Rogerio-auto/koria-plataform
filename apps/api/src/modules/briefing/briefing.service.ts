@@ -5,10 +5,11 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
-import { eq, like, desc } from 'drizzle-orm';
+import { eq, like, desc, and } from 'drizzle-orm';
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import { DATABASE_CONNECTION } from '../database/database.module';
-import { leads, leadQualification, workOrders, conversations } from '@koria/database';
+import { leads, leadQualification, workOrders, conversations, contactPoints } from '@koria/database';
+import { generateReturnUrl } from '@koria/utils';
 import { ConfigService } from '@nestjs/config';
 import { ClickupService } from '../clickup/clickup.service';
 import { BriefingFormConfigService } from '../settings/briefing-form-config.service';
@@ -81,6 +82,28 @@ export class BriefingService {
 
     const qualification = qualResult[0];
 
+    // Get primary contact point for channel detection
+    const cpResult = await this.db
+      .select({ channel: contactPoints.channel })
+      .from(contactPoints)
+      .where(
+        and(
+          eq(contactPoints.leadId, wo.leadId),
+          eq(contactPoints.isPrimary, true),
+        ),
+      )
+      .limit(1);
+
+    const channel = cpResult[0]?.channel ?? null;
+
+    // Get returnChannels from the active form config
+    let returnUrl: string | null = null;
+    const activeConfig = await this.formConfigService.getActiveForTenant(wo.tenantId);
+    const settings = activeConfig?.settings as Record<string, any> | undefined;
+    if (settings?.integrations?.returnChannels && channel) {
+      returnUrl = generateReturnUrl(channel, settings.integrations.returnChannels);
+    }
+
     return {
       leadId: lead.id,
       tenantId: wo.tenantId,
@@ -89,6 +112,8 @@ export class BriefingService {
       phone: qualification?.phoneNumber ?? null,
       status: qualification?.status ?? 'pending',
       alreadySubmitted: isDemoToken(token) ? false : qualification?.status === 'completed',
+      channel,
+      returnUrl,
     };
   }
 

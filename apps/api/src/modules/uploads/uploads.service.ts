@@ -1,8 +1,9 @@
 import { Injectable, Inject, Logger, BadRequestException } from '@nestjs/common';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import { DATABASE_CONNECTION } from '../database/database.module';
-import { workOrders, workOrderAssets, leads } from '@koria/database';
+import { workOrders, workOrderAssets, leads, contactPoints, briefingFormConfigs } from '@koria/database';
+import { generateReturnUrl } from '@koria/utils';
 import { ClickupService } from '../clickup/clickup.service';
 import { WebhookService } from '../webhook/webhook.service';
 import type {
@@ -36,6 +37,7 @@ export class UploadsService {
           dueAt: workOrders.dueAt,
           externalTaskId: workOrders.externalTaskId,
           leadId: workOrders.leadId,
+          tenantId: workOrders.tenantId,
         })
         .from(workOrders)
         .where(eq(workOrders.uploadToken, token))
@@ -69,10 +71,50 @@ export class UploadsService {
         status: wo.status,
         dueAt: wo.dueAt?.toISOString() ?? null,
         externalTaskId: wo.externalTaskId,
+        ...(await this.getReturnInfo(wo.leadId, wo.tenantId)),
       };
     } catch (error) {
       this.logger.error(`Error validating token: ${error}`);
       return null;
+    }
+  }
+
+  /**
+   * Get the lead's primary channel and compute a return URL from the tenant's form config.
+   */
+  private async getReturnInfo(leadId: string, tenantId: string): Promise<{ channel: string | null; returnUrl: string | null }> {
+    try {
+      const cpResult = await this.db
+        .select({ channel: contactPoints.channel })
+        .from(contactPoints)
+        .where(
+          and(
+            eq(contactPoints.leadId, leadId),
+            eq(contactPoints.isPrimary, true),
+          ),
+        )
+        .limit(1);
+
+      const channel = cpResult[0]?.channel ?? null;
+      if (!channel) return { channel: null, returnUrl: null };
+
+      const cfgResult = await this.db
+        .select({ settings: briefingFormConfigs.settings })
+        .from(briefingFormConfigs)
+        .where(
+          and(
+            eq(briefingFormConfigs.tenantId, tenantId),
+            eq(briefingFormConfigs.isActive, true),
+          ),
+        )
+        .limit(1);
+
+      const settings = cfgResult[0]?.settings as any;
+      const returnChannels = settings?.integrations?.returnChannels;
+      const returnUrl = generateReturnUrl(channel, returnChannels);
+      return { channel, returnUrl };
+    } catch {
+      return { channel: null, returnUrl: null };
     }
   }
 

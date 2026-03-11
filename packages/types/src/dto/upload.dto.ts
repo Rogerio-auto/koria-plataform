@@ -9,6 +9,8 @@ export interface ValidateUploadTokenResponse {
   status: string;
   dueAt: string | null;
   externalTaskId: string | null;
+  channel: string | null;
+  returnUrl: string | null;
 }
 
 /**

@@ -91,4 +91,6 @@ export interface BriefingFormConfig {
   phone: string | null;
   status: string;
   alreadySubmitted: boolean;
+  channel: string | null;
+  returnUrl: string | null;
 }

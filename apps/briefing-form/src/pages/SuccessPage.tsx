@@ -1,8 +1,30 @@
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { CheckCircle2 } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
+import { CheckCircle2, ExternalLink } from 'lucide-react';
 
 export function SuccessPage() {
   const { t } = useTranslation();
+  const location = useLocation();
+  const returnUrl = (location.state as { returnUrl?: string } | null)?.returnUrl ?? null;
+  const [countdown, setCountdown] = useState(3);
+
+  useEffect(() => {
+    if (!returnUrl) return;
+
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          window.location.href = returnUrl;
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [returnUrl]);
 
   const steps = [
     t('briefing.success.step1'),
@@ -37,6 +59,21 @@ export function SuccessPage() {
             ))}
           </ol>
         </div>
+
+        {returnUrl && (
+          <div className="space-y-2">
+            <p className="text-sm text-muted-foreground">
+              Redirecionando em <span className="font-semibold text-primary">{countdown}s</span>...
+            </p>
+            <a
+              href={returnUrl}
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+            >
+              <ExternalLink className="h-3.5 w-3.5" />
+              Voltar ao atendimento
+            </a>
+          </div>
+        )}
       </div>
     </div>
   );
