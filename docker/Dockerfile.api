@@ -16,6 +16,7 @@ RUN pnpm install --frozen-lockfile
 
 # Build workspace packages (produce dist/ with CJS output)
 RUN pnpm --filter @koria/types build
+RUN pnpm --filter @koria/utils build
 RUN pnpm --filter @koria/database build
 
 # Build the API
